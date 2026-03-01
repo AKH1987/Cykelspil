@@ -6,197 +6,156 @@
   <title>Dennis' Cykelspil 2026</title>
   <style>
     :root {
-      --primary:   #2D6A4F;
-      --primary-light: #52B788;
-      --primary-dark:  #1B4332;
-      --accent:    #E8B800;
-      --accent-bg: #FFF8E1;
-      --danger:    #C0392B;
-      --success:   #27AE60;
-      --bg:        #F4F7F5;
-      --card:      #FFFFFF;
-      --text:      #1A1A2E;
-      --muted:     #6B7280;
-      --border:    #E0EAE4;
-      --pending:   #7B2FBE;
-      --pending-bg:#F3E8FF;
+      --primary:#2D6A4F;--primary-light:#52B788;--primary-dark:#1B4332;
+      --accent:#E8B800;--accent-bg:#FFF8E1;--danger:#C0392B;--success:#27AE60;
+      --bg:#F4F7F5;--card:#FFFFFF;--text:#1A1A2E;--muted:#6B7280;--border:#E0EAE4;
+      --pending:#7B2FBE;--pending-bg:#F3E8FF;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding: 12px; }
-
-    .app-header { background: var(--primary-dark); color: white; border-radius: 16px; padding: 16px 20px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
-    .app-header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px; }
-    .app-header .subtitle { font-size: 0.78rem; color: var(--primary-light); margin-top: 2px; }
-    .season-progress { text-align: right; }
-    .season-progress .prog-label { font-size: 0.72rem; color: var(--primary-light); margin-bottom: 4px; }
-    .prog-bar-wrap { background: rgba(255,255,255,0.15); border-radius: 10px; height: 6px; width: 120px; }
-    .prog-bar { background: var(--accent); border-radius: 10px; height: 6px; transition: width 0.5s; }
-
-    .status-bar { display: flex; align-items: center; gap: 8px; background: var(--primary-dark); color: white; border-radius: 10px; padding: 7px 14px; margin-bottom: 12px; font-size: 0.8rem; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
-    .status-dot.offline { background: var(--danger); }
-    .status-dot.syncing { background: var(--accent); animation: pulse 1s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    .tabs { display: flex; gap: 4px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
-    .tab { flex: 1; min-width: 56px; padding: 9px 4px; text-align: center; border-radius: 10px; cursor: pointer; font-weight: 600; background: var(--card); color: var(--muted); font-size: 0.75rem; border: 1.5px solid var(--border); white-space: nowrap; transition: all 0.15s; }
-    .tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    section { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid var(--border); }
-    section h2 { font-size: 1rem; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); color: var(--primary-dark); display: flex; align-items: center; gap: 6px; }
-
-    table { width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 16px; overflow: hidden; }
-    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; word-wrap: break-word; font-size: 0.88rem; }
-    th { background: var(--primary); color: white; font-size: 0.82rem; font-weight: 600; }
-    .star-table td:first-child, .star-table th:first-child { width: 18%; }
-    .star-table td:nth-child(2), .star-table th:nth-child(2) { width: 24%; }
-    .star-table td:nth-child(3), .star-table th:nth-child(3) { width: 38%; }
-    .star-table td:nth-child(4), .star-table th:nth-child(4) { width: 20%; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #F0F7F3; }
-
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .info-box { background: var(--bg); border-radius: 10px; padding: 12px; border: 1px solid var(--border); }
-    .info-box span { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
-    .info-box strong { font-size: 0.95rem; color: var(--primary-dark); }
-
-    .standings-row td:first-child { font-size: 1.1rem; width: 40px; }
-    .standings-row.gold td { background: #FFFBEB; }
-    .standings-row.silver td { background: #F8FAFC; }
-    .standings-row.bronze td { background: #FFF7F2; }
-    .points-pill { display: inline-block; background: var(--primary); color: white; border-radius: 20px; padding: 2px 10px; font-weight: 700; font-size: 0.88rem; }
-    .points-diff { font-size: 0.75rem; color: var(--muted); margin-left: 6px; }
-
-    .order-list { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-    .player-chip { background: var(--primary-dark); color: white; border-radius: 20px; padding: 6px 14px; font-size: 0.84rem; font-weight: 500; transition: all 0.2s; }
-    .player-chip.active { background: var(--accent); color: var(--primary-dark); font-weight: 700; box-shadow: 0 2px 8px rgba(232,184,0,0.4); }
-    .player-chip.done { background: var(--border); color: var(--muted); text-decoration: line-through; }
-
-    .pick-box { background: var(--bg); border-radius: 12px; padding: 16px; margin-top: 10px; border: 1.5px solid var(--primary-light); }
-    .pick-box .turn-label { font-weight: 700; color: var(--primary-dark); margin-bottom: 12px; font-size: 1rem; }
-    .turn-name { color: var(--primary); }
-
-    .btn { background: var(--primary); color: white; border: none; padding: 11px 20px; border-radius: 16px; font-size: 0.92rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: 8px; transition: all 0.15s; }
-    .btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
-    .btn.small { padding: 5px 12px; font-size: 0.8rem; width: auto; margin-top: 0; border-radius: 10px; }
-    .btn.edit { background: var(--border); color: var(--text); }
-    .btn.edit:hover { background: #ccc; }
-    .btn.danger { background: var(--danger); }
-    .btn.danger:hover { background: #e74c3c; }
-    .btn.success { background: var(--success); }
-    .btn.success:hover { background: #2ecc71; }
-    .btn.warning { background: #E67E22; }
-    .btn.secondary { background: var(--muted); }
-    .btn.pending { background: var(--pending); }
-    .btn.pending:hover { background: #6a1fa8; }
-
-    .error { color: var(--danger); font-size: 0.86rem; margin-top: 6px; }
-    .star-hint { font-size: 0.8rem; color: var(--muted); margin-bottom: 10px; }
-
-    .ac-wrap { position: relative; margin-bottom: 10px; }
-    .ac-wrap input { width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 16px; font-size: 0.95rem; transition: border-color 0.15s; }
-    .ac-wrap input:focus { outline: none; border-color: var(--primary-light); }
-    .ac-wrap input.selected { border-color: var(--success); background: #F0FFF4; }
-    .ac-list { position: absolute; z-index: 10; width: 100%; background: white; border: 1.5px solid var(--border); border-radius: 16px; max-height: 200px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-    .ac-list li { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--border); list-style: none; font-size: 0.9rem; }
-    .ac-list li:last-child { border-bottom: none; }
-    .ac-list li:hover { background: #F0F7F3; }
-    .ac-list li.taken { color: #bbb; cursor: not-allowed; font-style: italic; }
-    .ac-list li.blocked { color: var(--danger); cursor: not-allowed; font-style: italic; }
-
-    .gm-panel { background: var(--accent-bg); border: 2px solid var(--accent); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
-    .gm-panel h3 { margin-bottom: 14px; color: var(--primary-dark); font-size: 1rem; }
-    .result-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
-    .result-row label { width: 70px; font-weight: 600; font-size: 0.84rem; padding-top: 11px; flex-shrink: 0; color: var(--muted); }
-    .result-row .ac-wrap { flex: 1; margin-bottom: 0; }
-    .override-wrap { display: none; background: var(--bg); border-radius: 10px; padding: 12px; margin-top: 8px; }
-    .override-wrap.open { display: block; }
-    .point-log { margin-top: 14px; list-style: none; }
-    .point-log li { padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; font-size: 0.88rem; }
-    .point-log li.plus { background: #F0FFF4; color: #1A5C35; border-left: 3px solid var(--success); }
-    .point-log li.zero { background: var(--bg); color: var(--muted); border-left: 3px solid var(--border); }
-
-    .countdown-box { border-radius: 16px; padding: 16px; text-align: center; margin-top: 12px; }
-    .countdown-box.active { background: var(--accent-bg); border: 2px solid var(--accent); }
-    .countdown-box.locked { background: #FDECEA; border: 2px solid var(--danger); }
-    .countdown-timer { font-size: 2.4rem; font-weight: 800; letter-spacing: 3px; margin: 6px 0; font-variant-numeric: tabular-nums; }
-    .countdown-box.active .countdown-timer { color: #9A6B00; }
-    .countdown-box.locked .countdown-timer { color: var(--danger); }
-    .countdown-label { font-size: 0.82rem; color: var(--muted); }
-
-    .round-badge { display: inline-block; background: var(--primary); color: white; border-radius: 20px; padding: 4px 14px; font-size: 0.82rem; font-weight: 600; margin-bottom: 12px; }
-
-    /* PENDING BANNER */
-    .pending-banner { background: var(--pending-bg); border: 2px solid var(--pending); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
-    .pending-banner-icon { font-size: 1.6rem; flex-shrink: 0; }
-    .pending-banner-text { flex: 1; }
-    .pending-banner-text strong { color: var(--pending); display: block; font-size: 0.95rem; margin-bottom: 2px; }
-    .pending-banner-text span { font-size: 0.82rem; color: var(--muted); }
-    .pending-count { background: var(--pending); color: white; border-radius: 20px; padding: 3px 10px; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
-
-    .history-round { border: 1.5px solid var(--border); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
-    .history-round.pending-round { border-color: var(--pending); }
-    .history-round-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg); cursor: pointer; }
-    .history-round.pending-round .history-round-header { background: var(--pending-bg); }
-    .history-round-header:hover { background: #E8F2EC; }
-    .history-round.pending-round .history-round-header:hover { background: #ead9f8; }
-    .history-round-body { display: none; padding: 16px; border-top: 1px solid var(--border); }
-    .history-round-body.open { display: block; }
-    .history-edit-panel { background: var(--accent-bg); border: 2px solid var(--accent); border-radius: 10px; padding: 14px; margin-top: 12px; display: none; }
-    .history-edit-panel.open { display: block; }
-
-    .status-badge { display: inline-block; border-radius: 20px; padding: 3px 10px; font-size: 0.75rem; font-weight: 700; }
-    .status-badge.pending { background: var(--pending-bg); color: var(--pending); border: 1px solid var(--pending); }
-    .status-badge.done { background: #EAFBEA; color: var(--success); border: 1px solid var(--success); }
-
-    .race-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 16px; margin-bottom: 6px; background: var(--card); border: 1.5px solid var(--border); }
-    .race-item.completed { opacity: 0.3; background: var(--bg); }
-    .race-item.pending-race { border-color: var(--pending); background: var(--pending-bg); opacity: 1; }
-    .race-item.current { border: 2px solid var(--accent); background: var(--accent-bg); }
-    .race-num { font-size: 0.72rem; color: var(--muted); width: 22px; flex-shrink: 0; text-align: right; }
-    .race-date { font-size: 0.75rem; color: var(--muted); width: 65px; flex-shrink: 0; }
-    .race-name { flex: 1; font-weight: 600; font-size: 0.88rem; }
-    .race-item.completed .race-name { text-decoration: line-through; color: var(--muted); }
-    .race-badge { font-size: 0.68rem; padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; font-weight: 600; }
-    .badge-monument  { background: #FDECEA; color: var(--danger); }
-    .badge-grandtour { background: #EAF4FF; color: #1A6AAD; }
-    .badge-normal    { background: var(--bg); color: var(--muted); }
-    .badge-done      { background: #EAFBEA; color: var(--success); }
-    .badge-pending   { background: var(--pending-bg); color: var(--pending); }
-
-    .gm-login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-    .gm-login-box { background: white; border-radius: 20px; padding: 32px 28px; width: 90%; max-width: 340px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-    .gm-login-box h2 { margin-bottom: 6px; color: var(--primary-dark); font-size: 1.3rem; }
-    .gm-login-box p { color: var(--muted); font-size: 0.88rem; margin-bottom: 20px; }
-    .gm-login-box input { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 1.1rem; margin-bottom: 10px; text-align: center; letter-spacing: 3px; }
-    .gm-login-box input:focus { outline: none; border-color: var(--primary-light); }
-
-    .gm-header-bar { background: #FDECEA; border: 2px solid var(--danger); border-radius: 16px; padding: 12px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
-    .last-pick-row td { background: #F0F7F3; }
-
-    /* PENDING RESULT PANEL in GM */
-    .pending-result-section { background: var(--pending-bg); border: 2px solid var(--pending); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
-    .pending-result-section h3 { color: var(--pending); margin-bottom: 12px; font-size: 0.95rem; }
-    .pending-result-item { background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; border: 1px solid #d4b0f0; }
-    .pending-result-item h4 { font-size: 0.9rem; margin-bottom: 10px; color: var(--primary-dark); }
-    .pending-resolve-panel { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #d4b0f0; }
-    .pending-resolve-panel.open { display: block; }
-
-    @media (max-width: 480px) {
-      body { padding: 8px; }
-      .app-header h1 { font-size: 1.1rem; }
-      th, td { padding: 7px 8px; font-size: 0.82rem; }
-      .tab { font-size: 0.7rem; padding: 8px 3px; }
-      .prog-bar-wrap { width: 80px; }
-    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);padding:12px}
+    .app-header{background:var(--primary-dark);color:white;border-radius:16px;padding:16px 20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+    .app-header h1{font-size:1.3rem;font-weight:700}
+    .app-header .subtitle{font-size:0.78rem;color:var(--primary-light);margin-top:2px}
+    .season-progress{text-align:right}
+    .prog-label{font-size:0.72rem;color:var(--primary-light);margin-bottom:4px}
+    .prog-bar-wrap{background:rgba(255,255,255,0.15);border-radius:10px;height:6px;width:120px}
+    .prog-bar{background:var(--accent);border-radius:10px;height:6px;transition:width 0.5s}
+    .status-bar{display:flex;align-items:center;gap:8px;background:var(--primary-dark);color:white;border-radius:10px;padding:7px 14px;margin-bottom:12px;font-size:0.8rem}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0}
+    .status-dot.offline{background:var(--danger)}
+    .status-dot.syncing{background:var(--accent);animation:pulse 1s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+    .tabs{display:flex;gap:4px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+    .tab{flex:1;min-width:56px;padding:9px 4px;text-align:center;border-radius:10px;cursor:pointer;font-weight:600;background:var(--card);color:var(--muted);font-size:0.75rem;border:1.5px solid var(--border);white-space:nowrap;transition:all 0.15s}
+    .tab.active{background:var(--primary);color:white;border-color:var(--primary)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    section{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid var(--border)}
+    section h2{font-size:1rem;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--border);color:var(--primary-dark);display:flex;align-items:center;gap:6px}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;border-radius:16px;overflow:hidden}
+    th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;word-wrap:break-word;font-size:0.88rem}
+    th{background:var(--primary);color:white;font-size:0.82rem;font-weight:600}
+    .star-table td:first-child,.star-table th:first-child{width:18%}
+    .star-table td:nth-child(2),.star-table th:nth-child(2){width:24%}
+    .star-table td:nth-child(3),.star-table th:nth-child(3){width:38%}
+    .star-table td:nth-child(4),.star-table th:nth-child(4){width:20%}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:#F0F7F3}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .info-box{background:var(--bg);border-radius:10px;padding:12px;border:1px solid var(--border)}
+    .info-box span{display:block;font-size:0.72rem;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.4px}
+    .info-box strong{font-size:0.95rem;color:var(--primary-dark)}
+    .standings-row td:first-child{font-size:1.1rem;width:40px}
+    .standings-row.gold td{background:#FFFBEB}
+    .standings-row.silver td{background:#F8FAFC}
+    .standings-row.bronze td{background:#FFF7F2}
+    .points-pill{display:inline-block;background:var(--primary);color:white;border-radius:20px;padding:2px 10px;font-weight:700;font-size:0.88rem}
+    .points-diff{font-size:0.75rem;color:var(--muted);margin-left:6px}
+    .order-list{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    .player-chip{background:var(--primary-dark);color:white;border-radius:20px;padding:6px 14px;font-size:0.84rem;font-weight:500;transition:all 0.2s}
+    .player-chip.active{background:var(--accent);color:var(--primary-dark);font-weight:700;box-shadow:0 2px 8px rgba(232,184,0,0.4)}
+    .player-chip.done{background:var(--border);color:var(--muted);text-decoration:line-through}
+    .pick-box{background:var(--bg);border-radius:12px;padding:16px;margin-top:10px;border:1.5px solid var(--primary-light)}
+    .pick-box .turn-label{font-weight:700;color:var(--primary-dark);margin-bottom:12px;font-size:1rem}
+    .turn-name{color:var(--primary)}
+    .btn{background:var(--primary);color:white;border:none;padding:11px 20px;border-radius:16px;font-size:0.92rem;font-weight:600;cursor:pointer;width:100%;margin-top:8px;transition:all 0.15s}
+    .btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .btn.small{padding:5px 12px;font-size:0.8rem;width:auto;margin-top:0;border-radius:10px}
+    .btn.edit{background:var(--border);color:var(--text)}
+    .btn.edit:hover{background:#ccc}
+    .btn.danger{background:var(--danger)}
+    .btn.danger:hover{background:#e74c3c}
+    .btn.success{background:var(--success)}
+    .btn.success:hover{background:#2ecc71}
+    .btn.warning{background:#E67E22}
+    .btn.secondary{background:var(--muted)}
+    .btn.pending{background:var(--pending)}
+    .btn.pending:hover{background:#6a1fa8}
+    .error{color:var(--danger);font-size:0.86rem;margin-top:6px}
+    .star-hint{font-size:0.8rem;color:var(--muted);margin-bottom:10px}
+    .ac-wrap{position:relative;margin-bottom:10px}
+    .ac-wrap input{width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:16px;font-size:0.95rem;transition:border-color 0.15s}
+    .ac-wrap input:focus{outline:none;border-color:var(--primary-light)}
+    .ac-wrap input.selected{border-color:var(--success);background:#F0FFF4}
+    .ac-list{position:absolute;z-index:10;width:100%;background:white;border:1.5px solid var(--border);border-radius:16px;max-height:200px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,0.1)}
+    .ac-list li{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);list-style:none;font-size:0.9rem}
+    .ac-list li:last-child{border-bottom:none}
+    .ac-list li:hover{background:#F0F7F3}
+    .ac-list li.taken{color:#bbb;cursor:not-allowed;font-style:italic}
+    .ac-list li.blocked{color:var(--danger);cursor:not-allowed;font-style:italic}
+    .gm-panel{background:var(--accent-bg);border:2px solid var(--accent);border-radius:16px;padding:16px;margin-bottom:16px}
+    .gm-panel h3{margin-bottom:14px;color:var(--primary-dark);font-size:1rem}
+    .result-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px}
+    .result-row label{width:70px;font-weight:600;font-size:0.84rem;padding-top:11px;flex-shrink:0;color:var(--muted)}
+    .result-row .ac-wrap{flex:1;margin-bottom:0}
+    .override-wrap{display:none;background:var(--bg);border-radius:10px;padding:12px;margin-top:8px}
+    .override-wrap.open{display:block}
+    .point-log{margin-top:14px;list-style:none}
+    .point-log li{padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:0.88rem}
+    .point-log li.plus{background:#F0FFF4;color:#1A5C35;border-left:3px solid var(--success)}
+    .point-log li.zero{background:var(--bg);color:var(--muted);border-left:3px solid var(--border)}
+    .countdown-box{border-radius:16px;padding:16px;text-align:center;margin-top:12px}
+    .countdown-box.active{background:var(--accent-bg);border:2px solid var(--accent)}
+    .countdown-box.locked{background:#FDECEA;border:2px solid var(--danger)}
+    .countdown-timer{font-size:2.4rem;font-weight:800;letter-spacing:3px;margin:6px 0;font-variant-numeric:tabular-nums}
+    .countdown-box.active .countdown-timer{color:#9A6B00}
+    .countdown-box.locked .countdown-timer{color:var(--danger)}
+    .countdown-label{font-size:0.82rem;color:var(--muted)}
+    .round-badge{display:inline-block;background:var(--primary);color:white;border-radius:20px;padding:4px 14px;font-size:0.82rem;font-weight:600;margin-bottom:12px}
+    .pending-banner{background:var(--pending-bg);border:2px solid var(--pending);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+    .pending-banner-icon{font-size:1.6rem;flex-shrink:0}
+    .pending-banner-text{flex:1}
+    .pending-banner-text strong{color:var(--pending);display:block;font-size:0.95rem;margin-bottom:2px}
+    .pending-banner-text span{font-size:0.82rem;color:var(--muted)}
+    .pending-count{background:var(--pending);color:white;border-radius:20px;padding:3px 10px;font-size:0.78rem;font-weight:700;flex-shrink:0}
+    .history-round{border:1.5px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden}
+    .history-round.pending-round{border-color:var(--pending)}
+    .history-round-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--bg);cursor:pointer}
+    .history-round.pending-round .history-round-header{background:var(--pending-bg)}
+    .history-round-header:hover{background:#E8F2EC}
+    .history-round.pending-round .history-round-header:hover{background:#ead9f8}
+    .history-round-body{display:none;padding:16px;border-top:1px solid var(--border)}
+    .history-round-body.open{display:block}
+    .history-edit-panel{background:var(--accent-bg);border:2px solid var(--accent);border-radius:10px;padding:14px;margin-top:12px;display:none}
+    .history-edit-panel.open{display:block}
+    .status-badge{display:inline-block;border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:700}
+    .status-badge.pending{background:var(--pending-bg);color:var(--pending);border:1px solid var(--pending)}
+    .status-badge.done{background:#EAFBEA;color:var(--success);border:1px solid var(--success)}
+    .race-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:16px;margin-bottom:6px;background:var(--card);border:1.5px solid var(--border)}
+    .race-item.completed{opacity:0.3;background:var(--bg)}
+    .race-item.pending-race{border-color:var(--pending);background:var(--pending-bg);opacity:1}
+    .race-item.current{border:2px solid var(--accent);background:var(--accent-bg)}
+    .race-num{font-size:0.72rem;color:var(--muted);width:22px;flex-shrink:0;text-align:right}
+    .race-date{font-size:0.75rem;color:var(--muted);width:65px;flex-shrink:0}
+    .race-name{flex:1;font-weight:600;font-size:0.88rem}
+    .race-item.completed .race-name{text-decoration:line-through;color:var(--muted)}
+    .race-badge{font-size:0.68rem;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;font-weight:600}
+    .badge-monument{background:#FDECEA;color:var(--danger)}
+    .badge-grandtour{background:#EAF4FF;color:#1A6AAD}
+    .badge-normal{background:var(--bg);color:var(--muted)}
+    .badge-done{background:#EAFBEA;color:var(--success)}
+    .badge-pending{background:var(--pending-bg);color:var(--pending)}
+    .gm-login-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+    .gm-login-box{background:white;border-radius:20px;padding:32px 28px;width:90%;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+    .gm-login-box h2{margin-bottom:6px;color:var(--primary-dark);font-size:1.3rem}
+    .gm-login-box p{color:var(--muted);font-size:0.88rem;margin-bottom:20px}
+    .gm-login-box input{width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;font-size:1.1rem;margin-bottom:10px;text-align:center;letter-spacing:3px}
+    .gm-login-box input:focus{outline:none;border-color:var(--primary-light)}
+    .gm-header-bar{background:#FDECEA;border:2px solid var(--danger);border-radius:16px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+    .last-pick-row td{background:#F0F7F3}
+    .pending-result-section{background:var(--pending-bg);border:2px solid var(--pending);border-radius:14px;padding:16px;margin-bottom:16px}
+    .pending-result-section h3{color:var(--pending);margin-bottom:12px;font-size:0.95rem}
+    .pending-result-item{background:white;border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid #d4b0f0}
+    .pending-result-item h4{font-size:0.9rem;margin-bottom:10px;color:var(--primary-dark)}
+    .pending-resolve-panel{display:none;margin-top:12px;padding-top:12px;border-top:1px solid #d4b0f0}
+    .pending-resolve-panel.open{display:block}
+    .fav-box{background:var(--pending-bg);border:2px solid var(--pending);border-radius:12px;padding:14px;margin-bottom:12px}
+    @media(max-width:480px){body{padding:8px}.app-header h1{font-size:1.1rem}th,td{padding:7px 8px;font-size:0.82rem}.tab{font-size:0.7rem;padding:8px 3px}.prog-bar-wrap{width:80px}}
   </style>
 </head>
 <body>
 
-<!-- GM LOGIN OVERLAY -->
 <div class="gm-login-overlay" id="gm-overlay" style="display:none">
   <div class="gm-login-box">
     <div style="font-size:2rem;margin-bottom:8px">🛠️</div>
@@ -209,7 +168,6 @@
   </div>
 </div>
 
-<!-- HEADER -->
 <div class="app-header">
   <div>
     <h1>🚴 Daily's gætteleg 2026</h1>
@@ -221,13 +179,11 @@
   </div>
 </div>
 
-<!-- STATUS -->
 <div class="status-bar">
   <div class="status-dot syncing" id="status-dot"></div>
   <span id="status-text">Forbinder til Firebase…</span>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
   <button class="tab active" onclick="switchTab('player')">🚴 Spil</button>
   <button class="tab" onclick="switchTab('standings')">🏆 Stilling</button>
@@ -267,6 +223,13 @@
     <h2>🎯 Valgrækkefølge</h2>
     <div class="round-badge" id="round-badge">Runde 1</div>
     <div class="order-list" id="order-list"></div>
+    <div id="favorites-player-box" class="fav-box" style="display:none">
+      <div style="font-weight:700;color:var(--pending);margin-bottom:8px;font-size:0.95rem">⭐ Indtast løbets 5-stjernede favoritter</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">Som første vælger kan du indtaste Axelgaards favoritter inden alle vælger.</p>
+      <div id="player-favorites-list"></div>
+      <button class="btn small pending" style="width:auto;margin-top:4px" onclick="addPlayerFavoriteRow()">➕ Tilføj favorit</button>
+      <button class="btn small success" style="width:auto;margin-top:4px;margin-left:6px" onclick="savePlayerFavorites()">💾 Gem og fortsæt</button>
+    </div>
     <div class="pick-box" id="pick-box">
       <div class="turn-label">Det er <span class="turn-name" id="active-name"></span>'s tur!</div>
       <div class="ac-wrap">
@@ -344,53 +307,41 @@
   <section><h2>🎯 Formål</h2><p style="line-height:1.7">55 løb/etaper. Én rytter pr. løb. Ingen kan vælge samme rytter. Rækkefølgen er fastlagt via lodtrækning og roterer hvert løb.</p></section>
   <section>
     <h2>🔄 Valgrækkefølge</h2>
-    <table>
-      <thead><tr><th style="width:30%">Runde</th><th>Rækkefølge</th></tr></thead>
-      <tbody>
-        <tr><td>Runde 1</td><td>Emil → Christian → Dennis → Mathias → Anders → Tobias</td></tr>
-        <tr><td>Runde 2</td><td>Christian → Dennis → Mathias → Anders → Tobias → Emil</td></tr>
-        <tr><td>Runde 3</td><td>Dennis → Mathias → Anders → Tobias → Emil → Christian</td></tr>
-        <tr><td colspan="2" style="color:var(--muted);font-size:0.85rem">…og så videre</td></tr>
-      </tbody>
-    </table>
+    <table><thead><tr><th style="width:30%">Runde</th><th>Rækkefølge</th></tr></thead><tbody>
+      <tr><td>Runde 1</td><td>Emil → Christian → Dennis → Mathias → Anders → Tobias</td></tr>
+      <tr><td>Runde 2</td><td>Christian → Dennis → Mathias → Anders → Tobias → Emil</td></tr>
+      <tr><td>Runde 3</td><td>Dennis → Mathias → Anders → Tobias → Emil → Christian</td></tr>
+      <tr><td colspan="2" style="color:var(--muted);font-size:0.85rem">…og så videre</td></tr>
+    </tbody></table>
   </section>
   <section>
     <h2>🏅 Pointsystem</h2>
-    <table>
-      <thead><tr><th>Placering</th><th>Normal</th><th>Monument / GT</th></tr></thead>
-      <tbody>
-        <tr><td>🥇 1. plads</td><td>6 pt</td><td>12 pt</td></tr>
-        <tr><td>🥈 2. plads</td><td>4 pt</td><td>8 pt</td></tr>
-        <tr><td>🥉 3. plads</td><td>3 pt</td><td>6 pt</td></tr>
-        <tr><td>4. plads</td><td>2 pt</td><td>4 pt</td></tr>
-        <tr><td>5. plads</td><td>1 pt</td><td>2 pt</td></tr>
-      </tbody>
-    </table>
+    <table><thead><tr><th>Placering</th><th>Normal</th><th>Monument / GT</th></tr></thead><tbody>
+      <tr><td>🥇 1. plads</td><td>6 pt</td><td>12 pt</td></tr>
+      <tr><td>🥈 2. plads</td><td>4 pt</td><td>8 pt</td></tr>
+      <tr><td>🥉 3. plads</td><td>3 pt</td><td>6 pt</td></tr>
+      <tr><td>4. plads</td><td>2 pt</td><td>4 pt</td></tr>
+      <tr><td>5. plads</td><td>1 pt</td><td>2 pt</td></tr>
+    </tbody></table>
     <p style="margin-top:10px;font-size:0.85rem;color:var(--muted)">⚡ Monumenter og Grand Tour-etaper giver dobbeltpoint på alt inkl. bonusser.</p>
   </section>
   <section>
     <h2>⭐ Axelgaard-regler</h2>
-    <table>
-      <thead><tr><th>Stjerner</th><th>Justering</th></tr></thead>
-      <tbody>
-        <tr><td>⭐⭐⭐⭐⭐ (favorit)</td><td>−1 point</td></tr>
-        <tr><td>⭐⭐⭐⭐ / ⭐⭐⭐</td><td>0 point</td></tr>
-        <tr><td>⭐⭐</td><td>+1 point</td></tr>
-        <tr><td>⭐</td><td>+2 point</td></tr>
-        <tr><td>Ikke nævnt</td><td>+3 point</td></tr>
-      </tbody>
-    </table>
+    <table><thead><tr><th>Stjerner</th><th>Justering</th></tr></thead><tbody>
+      <tr><td>⭐⭐⭐⭐⭐ (favorit)</td><td>−1 point altid</td></tr>
+      <tr><td>⭐⭐⭐⭐ / ⭐⭐⭐</td><td>0 point</td></tr>
+      <tr><td>⭐⭐</td><td>+1 point (kun hvis top 5)</td></tr>
+      <tr><td>⭐</td><td>+2 point (kun hvis top 5)</td></tr>
+      <tr><td>Ikke nævnt</td><td>+3 point (kun hvis top 5)</td></tr>
+    </tbody></table>
   </section>
   <section><h2>🇩🇰 Danskerbonus</h2><p style="line-height:1.7">Dansk rytter i top 5 → <strong>+1 ekstra point</strong>. Fordobles ved Monument/GT.</p></section>
   <section>
     <h2>🚦 Begrænsninger</h2>
-    <table>
-      <thead><tr><th>Regel</th><th>Begrænsning</th></tr></thead>
-      <tbody>
-        <tr><td>🌟 Top-8 rytter</td><td>Max <strong>4 valg</strong> – samme kun <strong>én gang</strong></td></tr>
-        <tr><td>⭐⭐⭐⭐⭐ Favorit</td><td>Max <strong>5 valg</strong> per sæson</td></tr>
-      </tbody>
-    </table>
+    <table><thead><tr><th>Regel</th><th>Begrænsning</th></tr></thead><tbody>
+      <tr><td>🌟 Top-8 rytter</td><td>Max <strong>4 valg</strong> – samme kun <strong>én gang</strong></td></tr>
+      <tr><td>⭐⭐⭐⭐⭐ Favorit</td><td>Max <strong>5 valg</strong> per sæson</td></tr>
+    </tbody></table>
     <p style="margin-top:10px;font-size:0.82rem;color:var(--muted)">🌟 Top-8: Pogačar, Vingegaard, Del Toro, Mads Pedersen, Almeida, Evenepoel, Pidcock, van der Poel</p>
   </section>
   <section><h2>🎩 Hvis en spiller ikke svarer</h2><p style="line-height:1.7">GM indsætter den højest placerede ikke-valgte rytter fra Axelgaards rapport.</p></section>
@@ -403,8 +354,6 @@
     <strong style="color:var(--danger)">GM-tilstand aktiv</strong>
     <button class="btn danger small" style="margin-left:auto;margin-top:0" onclick="gmLogout()">Log ud</button>
   </div>
-
-  <!-- AFVENTENDE RESULTATER -->
   <div id="gm-pending-section" style="display:none">
     <div class="pending-result-section">
       <h3>🕐 Afventende resultater</h3>
@@ -412,14 +361,20 @@
       <div id="gm-pending-list"></div>
     </div>
   </div>
-
+  <section>
+    <h2>⭐ Axelgaard-favoritter (5 stjerner)</h2>
+    <p class="star-hint">Indsæt løbets 5-stjernede favoritter inden runden starter. Default er 1 felt – tilføj flere ved behov.</p>
+    <div id="gm-favorites-list"></div>
+    <button class="btn small success" style="width:auto;margin-top:6px" onclick="addFavoriteRow()">➕ Tilføj endnu en favorit</button>
+    <button class="btn small" style="width:auto;margin-top:6px;margin-left:6px" onclick="saveFavorites()">💾 Gem favoritter</button>
+  </section>
   <section>
     <h2>📅 Løbsinfo</h2>
     <div id="gm-race-info" style="background:var(--bg);border-radius:10px;padding:14px;font-size:0.92rem;line-height:1.9">Indlæser…</div>
   </section>
   <section>
-    <h2>⭐ Axelgaard-stjerner & ryttervalg</h2>
-    <p class="star-hint">Tildel stjerner til de valgte ryttere inden beregning.</p>
+    <h2>⭐ Axelgaard-stjerner og ryttervalg</h2>
+    <p class="star-hint">Tildel stjerner til de valgte ryttere inden beregning. 5-stjernede favoritter auto-udfyldes.</p>
     <table class="star-table">
       <thead><tr><th>Spiller</th><th>Rytter</th><th>Stjerner</th><th>Ændr</th></tr></thead>
       <tbody id="star-table-body"></tbody>
@@ -451,8 +406,8 @@
   <section>
     <h2>➡️ Næste runde</h2>
     <p style="font-size:0.88rem;color:var(--muted);margin-bottom:12px">Afslut runden når point er beregnet og bekræftet.</p>
-    <button class="btn success" id="next-round-btn">🏁 Afslut runde & start næste</button>
-    <button class="btn pending" id="pending-round-btn" style="margin-top:8px">🕐 Gem som "Afventer resultat" & start næste</button>
+    <button class="btn success" id="next-round-btn">🏁 Afslut runde og start næste</button>
+    <button class="btn pending" id="pending-round-btn" style="margin-top:8px">🕐 Gem som Afventer resultat og start næste</button>
   </section>
   <section>
     <h2>📜 Rundehistorik</h2>
@@ -464,133 +419,116 @@
 <script src="https://cdn.jsdelivr.net/npm/firebase@9.23.0/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCYxN2e6DZVRDLMfNYM3uRBc7bsnKZdbrA",
-  authDomain: "dennis-cykelspil.firebaseapp.com",
-  databaseURL: "https://dennis-cykelspil-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "dennis-cykelspil",
-  storageBucket: "dennis-cykelspil.firebasestorage.app",
-  messagingSenderId: "490352172473",
-  appId: "1:490352172473:web:9c8f10c32faaccf478ea68"
-};
+var firebaseConfig={apiKey:"AIzaSyCYxN2e6DZVRDLMfNYM3uRBc7bsnKZdbrA",authDomain:"dennis-cykelspil.firebaseapp.com",databaseURL:"https://dennis-cykelspil-default-rtdb.europe-west1.firebasedatabase.app",projectId:"dennis-cykelspil",storageBucket:"dennis-cykelspil.firebasestorage.app",messagingSenderId:"490352172473",appId:"1:490352172473:web:9c8f10c32faaccf478ea68"};
 firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
+var db=firebase.database();
 
-var GM_CODE = "Akh1987akh";
-
-var RACES = [
-  { date:"16/2/2026",  name:"UAE Tour",                     type:"normal"    },
-  { date:"18/2/2026",  name:"Vuelta a Andalucía",           type:"normal"    },
-  { date:"28/2/2026",  name:"Omloop Het Nieuwsblad",        type:"normal"    },
-  { date:"1/3/2026",   name:"Kuurne–Bruxelles–Kuurne",      type:"normal"    },
-  { date:"7/3/2026",   name:"Strade Bianche",               type:"normal"    },
-  { date:"8/3/2026",   name:"Paris-Nice",                   type:"normal"    },
-  { date:"9/3/2026",   name:"Tirreno-Adriatico",            type:"normal"    },
-  { date:"21/3/2026",  name:"Milano–Sanremo",               type:"monument"  },
-  { date:"23/3/2026",  name:"Katalonien Rundt",             type:"normal"    },
-  { date:"25/3/2026",  name:"Classic Brugge–De Panne",      type:"normal"    },
-  { date:"27/3/2026",  name:"E3 Saxo Classic",              type:"normal"    },
-  { date:"29/3/2026",  name:"Gent–Wevelgem",                type:"normal"    },
-  { date:"1/4/2026",   name:"Dwars door Vlaanderen",        type:"normal"    },
-  { date:"5/4/2026",   name:"Ronde van Vlaanderen",         type:"monument"  },
-  { date:"6/4/2026",   name:"Baskerlandet Rundt",           type:"normal"    },
-  { date:"8/4/2026",   name:"Scheldeprijs",                 type:"normal"    },
-  { date:"12/4/2026",  name:"Paris–Roubaix",                type:"monument"  },
-  { date:"19/4/2026",  name:"Amstel Gold Race",             type:"normal"    },
-  { date:"22/4/2026",  name:"Flèche Wallonne",              type:"normal"    },
-  { date:"26/4/2026",  name:"Liège–Bastogne–Liège",         type:"monument"  },
-  { date:"28/4/2026",  name:"Romandiet Rundt",              type:"normal"    },
-  { date:"1/5/2026",   name:"Eschborn–Frankfurt",           type:"normal"    },
-  { date:"8/5/2026",   name:"Giro d'Italia – Vinder",       type:"grandtour" },
-  { date:"15/5/2026",  name:"Giro d'Italia – 7. Etape",     type:"grandtour" },
-  { date:"20/5/2026",  name:"4 dage ved Dunkerque",         type:"normal"    },
-  { date:"23/5/2026",  name:"Giro d'Italia – 14. Etape",    type:"grandtour" },
-  { date:"28/5/2026",  name:"Tour of Norway",               type:"normal"    },
-  { date:"29/5/2026",  name:"Giro d'Italia – 19. Etape",    type:"grandtour" },
-  { date:"7/6/2026",   name:"Critérium du Dauphiné",        type:"normal"    },
-  { date:"14/6/2026",  name:"Copenhagen Sprint",            type:"normal"    },
-  { date:"17/6/2026",  name:"Tour de Suisse",               type:"normal"    },
-  { date:"7/7/2026",   name:"Tour de France – Vinder",      type:"grandtour" },
-  { date:"9/7/2026",   name:"Tour de France – 6. Etape",    type:"grandtour" },
-  { date:"18/7/2026",  name:"Tour de France – 14. Etape",   type:"grandtour" },
-  { date:"26/7/2026",  name:"Tour de France – 21. Etape",   type:"grandtour" },
-  { date:"29/7/2026",  name:"PostNord Danmark Rundt",       type:"normal"    },
-  { date:"1/8/2026",   name:"Donostia–San Sebastián",       type:"normal"    },
-  { date:"3/8/2026",   name:"Tour de Pologne",              type:"normal"    },
-  { date:"4/8/2026",   name:"Vuelta a Burgos",              type:"normal"    },
-  { date:"19/8/2026",  name:"Renewi Tour",                  type:"normal"    },
-  { date:"22/8/2026",  name:"La Vuelta – Vinder",           type:"grandtour" },
-  { date:"25/8/2026",  name:"La Vuelta – 4. Etape",         type:"grandtour" },
-  { date:"30/8/2026",  name:"Bretagne Classic",             type:"normal"    },
-  { date:"5/9/2026",   name:"La Vuelta – 14. Etape",        type:"grandtour" },
-  { date:"11/9/2026",  name:"GP Cycliste de Québec",        type:"normal"    },
-  { date:"12/9/2026",  name:"La Vuelta – 20. Etape",        type:"grandtour" },
-  { date:"13/9/2026",  name:"GP Cycliste de Montréal",      type:"normal"    },
-  { date:"20/9/2026",  name:"VM Enkeltstart",               type:"normal"    },
-  { date:"27/9/2026",  name:"VM Linjeløb",                  type:"normal"    },
-  { date:"3/10/2026",  name:"Sparkassen Münsterland Giro",  type:"normal"    },
-  { date:"6/10/2026",  name:"EM Ljubljana",                 type:"normal"    },
-  { date:"8/10/2026",  name:"Gran Piemonte",                type:"normal"    },
-  { date:"10/10/2026", name:"Il Lombardia",                 type:"monument"  },
-  { date:"10/11/2026", name:"Paris–Tours",                  type:"normal"    },
+var GM_CODE="Akh1987akh";
+var RACES=[
+  {date:"16/2/2026",name:"UAE Tour",type:"normal"},
+  {date:"18/2/2026",name:"Vuelta a Andalucía",type:"normal"},
+  {date:"28/2/2026",name:"Omloop Het Nieuwsblad",type:"normal"},
+  {date:"1/3/2026",name:"Kuurne–Bruxelles–Kuurne",type:"normal"},
+  {date:"7/3/2026",name:"Strade Bianche",type:"normal"},
+  {date:"8/3/2026",name:"Paris-Nice",type:"normal"},
+  {date:"9/3/2026",name:"Tirreno-Adriatico",type:"normal"},
+  {date:"21/3/2026",name:"Milano–Sanremo",type:"monument"},
+  {date:"23/3/2026",name:"Katalonien Rundt",type:"normal"},
+  {date:"25/3/2026",name:"Classic Brugge–De Panne",type:"normal"},
+  {date:"27/3/2026",name:"E3 Saxo Classic",type:"normal"},
+  {date:"29/3/2026",name:"Gent–Wevelgem",type:"normal"},
+  {date:"1/4/2026",name:"Dwars door Vlaanderen",type:"normal"},
+  {date:"5/4/2026",name:"Ronde van Vlaanderen",type:"monument"},
+  {date:"6/4/2026",name:"Baskerlandet Rundt",type:"normal"},
+  {date:"8/4/2026",name:"Scheldeprijs",type:"normal"},
+  {date:"12/4/2026",name:"Paris–Roubaix",type:"monument"},
+  {date:"19/4/2026",name:"Amstel Gold Race",type:"normal"},
+  {date:"22/4/2026",name:"Flèche Wallonne",type:"normal"},
+  {date:"26/4/2026",name:"Liège–Bastogne–Liège",type:"monument"},
+  {date:"28/4/2026",name:"Romandiet Rundt",type:"normal"},
+  {date:"1/5/2026",name:"Eschborn–Frankfurt",type:"normal"},
+  {date:"8/5/2026",name:"Giro d'Italia – Vinder",type:"grandtour"},
+  {date:"15/5/2026",name:"Giro d'Italia – 7. Etape",type:"grandtour"},
+  {date:"20/5/2026",name:"4 dage ved Dunkerque",type:"normal"},
+  {date:"23/5/2026",name:"Giro d'Italia – 14. Etape",type:"grandtour"},
+  {date:"28/5/2026",name:"Tour of Norway",type:"normal"},
+  {date:"29/5/2026",name:"Giro d'Italia – 19. Etape",type:"grandtour"},
+  {date:"7/6/2026",name:"Critérium du Dauphiné",type:"normal"},
+  {date:"14/6/2026",name:"Copenhagen Sprint",type:"normal"},
+  {date:"17/6/2026",name:"Tour de Suisse",type:"normal"},
+  {date:"7/7/2026",name:"Tour de France – Vinder",type:"grandtour"},
+  {date:"9/7/2026",name:"Tour de France – 6. Etape",type:"grandtour"},
+  {date:"18/7/2026",name:"Tour de France – 14. Etape",type:"grandtour"},
+  {date:"26/7/2026",name:"Tour de France – 21. Etape",type:"grandtour"},
+  {date:"29/7/2026",name:"PostNord Danmark Rundt",type:"normal"},
+  {date:"1/8/2026",name:"Donostia–San Sebastián",type:"normal"},
+  {date:"3/8/2026",name:"Tour de Pologne",type:"normal"},
+  {date:"4/8/2026",name:"Vuelta a Burgos",type:"normal"},
+  {date:"19/8/2026",name:"Renewi Tour",type:"normal"},
+  {date:"22/8/2026",name:"La Vuelta – Vinder",type:"grandtour"},
+  {date:"25/8/2026",name:"La Vuelta – 4. Etape",type:"grandtour"},
+  {date:"30/8/2026",name:"Bretagne Classic",type:"normal"},
+  {date:"5/9/2026",name:"La Vuelta – 14. Etape",type:"grandtour"},
+  {date:"11/9/2026",name:"GP Cycliste de Québec",type:"normal"},
+  {date:"12/9/2026",name:"La Vuelta – 20. Etape",type:"grandtour"},
+  {date:"13/9/2026",name:"GP Cycliste de Montréal",type:"normal"},
+  {date:"20/9/2026",name:"VM Enkeltstart",type:"normal"},
+  {date:"27/9/2026",name:"VM Linjeløb",type:"normal"},
+  {date:"3/10/2026",name:"Sparkassen Münsterland Giro",type:"normal"},
+  {date:"6/10/2026",name:"EM Ljubljana",type:"normal"},
+  {date:"8/10/2026",name:"Gran Piemonte",type:"normal"},
+  {date:"10/10/2026",name:"Il Lombardia",type:"monument"},
+  {date:"10/11/2026",name:"Paris–Tours",type:"normal"}
 ];
+var PLAYERS_DEFAULT=["Emil","Christian","Dennis","Mathias","Anders","Tobias"];
+var TOP8=["Tadej Pogačar","Jonas Vingegaard","Isaac Del Toro","Mads Pedersen","João Almeida","Remco Evenepoel","Tom Pidcock","Mathieu van der Poel"];
+var danishRiders=["Albert Withen Philipsen","Alexander Salby","Anders Halland Johannessen","Andreas Kron","Anthon Charmig","Asbjørn Hellemose","Casper Pedersen","Frederik Wandahl","Jonas Vingegaard","Kasper Asgreen","Mads Pedersen","Magnus Cort","Mathias Bregnhøj","Mattias Skjelmose","Mikkel Bjerg","Mikkel Frølich Honoré","Mikkel Honoré","Niklas Larsen","Søren Kragh Andersen","Søren Wærenskjold","Tobias Lund Andresen","Mads Würtz Schmidt"];
+var allRiders=["Tadej Pogačar","Tim van Dijke","Aimé De Gendt","Isaac Del Toro","Jonas Vingegaard","Mads Pedersen","Remco Evenepoel","João Almeida","Mathieu Van Der Poel","Thomas Pidcock","Juan Ayuso","Wout Van Aert","Jay Vine","Ben Healy","Arnaud De Lie","Florian Lipowitz","Christian Scaroni","Oscar Onley","Giulio Ciccone","Felix Gall","Jasper Philipsen","Kévin Vauquelin","Paul Magnier","Mattias Skjelmose","Brandon Mcnulty","Jonathan Milan","Filippo Ganna","Michael Storer","Olav Kooij","Simon Yates","Matteo Jorgenson","Mauro Schmid","Michael Matthews","Matthew Brennan","Antonio Tiberi","Tim Merlier","Primož Roglič","Romain Grégoire","Derek Gee","Lenny Martinez","Richard Carapaz","Biniam Girmay","Egan Bernal","Giulio Pellizzari","Tobias Lund Andresen","Emilien Jeannière","Tobias Halland Johannessen","Neilson Powless","Jan Christen","Jai Hindley","Adam Yates","Thymen Arensman","Simone Velasco","Alex Aranburu","Julian Alaphilippe","Kaden Groves","Lorenzo Fortunato","Lukáš Kubiš","Luke Plapp","Tiesj Benoot","Paul Seixas","Quinn Simmons","Tim Wellens","Corbin Strong","Jordi Meeus","Matthew Riccitello","Søren Wærenskjold","Marc Hirschi","Orluis Aular","Pavel Bittner","Milan Fretin","Toms Skujiņš","Nicolas Prodhomme","Fred Wright","António Morgado","Harold Tejada","Enric Mas","Ben O'Connor","Florian Vermeersch","Dorian Godon","Ethan Vernon","Jonas Abrahamsen","Dylan Groenewegen","Ben Tulett","Ilan Van Wilder","Diego Ulissi","Iván Romeo","Matteo Moschetti","Pavel Sivakov","Damiano Caruso","Matteo Trentin","Harold Martín López","Samuel Watson","Yevgeniy Fedorov","Sepp Kuss","Clément Champoussin","Paul Lapeira","Max Kanter","Thibau Nys","Jasper Stuyven","Mike Teunissen","Magnus Cort","Dries De Bondt","Bastien Tronchon","Jon Barrenetxea","Laurenz Rex","Daan Hoole","Gianni Vermeersch","Anthony Turgis","Benoît Cosnefroy","Harry Sweeny","Nicolas Vinokurov","Arnaud Démare","Carlos Rodríguez","Rafał Majka","Alex Baudin","Fredrik Dversnes Lavik","Afonso Eulálio","Alexander Salby","Jenthe Biermans","Frank Van Den Broek","Maxime Decomble","Benjamin Thomas","Luke Lamperti","Fernando Barceló","Javier Romo","Matyáš Kopecký","Felix Engelhardt","Clément Berthet","Daniel Felipe Martínez","Pascal Ackermann","Matej Mohorič","Raúl García Pierna","Joris Delbove","Aleksandr Vlasov","Andrea Raccagni Noviero","Christophe Laporte","Steffen De Schuyteneer","Nikiforos Arvanitou","Nico Denz","Ivo Oliveira","Marcin Budziński","Max Poole","Eduard Prades","Lorenzo Quartucci","David De La Cruz","Alec Segaert","Jonas Rutsch","Cees Bol","Pau Martí","Laurence Pithie","Haimar Etxeberria","Stefan De Bod","Héctor Álvarez","Georg Zimmermann","Timo Kielich","Marijn Van Den Berg","Filippo Fiorelli","Luca Mozzato","Marius Mayrhofer","Alex Molenaar","Jakob Omrzel","Iván García Cortina","Valentin Paret-Peintre","David Gaudu","Iván Cobo","Casper Van Uden","Sakarias Koller Løland","Filippo Baroncini","Romain Bardet","Alexis Guerin","Sergio Geovani Chumil","Mattia Cattaneo","Brieuc Rolland","Wout Poels","Eddie Dunbar","Haoyu Su","Alessandro Fancellu","Marco Schrettl","Andreas Kron","Casper Pedersen","Gianmarco Garofoli","Dušan Rajović","Oded Kogut","José Manuel Díaz","Francesco Busatto","Vincenzo Albanese","Brent Van Moer","Nikita Tsvetkov","Rein Taaramäe","Clément Braz Afonso","Kevin Vermaerke","Pierre Gautherat","Victor Campenaerts","Abel Balderstone","Florian Stork","Gerben Thijssen","Archie Ryan","Chris Harper","Alexandre Mayer","Lennard Kämna","Léo Bisiaux","Guillermo Thomas Silva","Jordan Jegat","Alberto Bettiol","Jhonatan Narváez","Alexandre Delettre","Andrea Bagioli","Louis Barré","Andreas Leknessund","Stefan Küng","Johannes Kulset","Tibor Del Grosso","Mathys Rondel","Felix Großschartner","Lewis Askey","Mikel Landa","Henok Mulubrhan","Hugo Hofstetter","Pello Bilbao","Guillaume Martin","Magnus Sheffield","Davide Ballerini","Axel Laurance","Cian Uijtdebroeks","Santiago Buitrago","Matteo Malucelli","Clément Venturini","Sandy Dujardin","Anders Halland Johannessen","Marco Frigo","Cristián Rodríguez","Einer Rubio","Giovanni Lonardi","Fabio Christen","Davide Piganzoli","Edoardo Zambanini","Niklas Larsen","Albert Withen Philipsen","Natnael Tesfatsion","Rory Townsend","Danny Van Poppel","Ben Turner","Torstein Træen","Aurélien Paret-Peintre","Paul Double","Brady Gilmore","Phil Bauhaus","Madis Mihkels","Alexis Renard","Thibaud Gruel","Bruno Armirail","Paul Penhoët","Milan Menten","Filippo Zana","Aaron Gate","Jarno Widar","Alexander Kristoff","Quinten Hermans","Junior Lecerf","Joshua Tarling","Arne Marit","Matteo Sobrero","Ewen Costiou","Rasmus Tiller","Lennert Van Eetvelt","Andrea Vendrame","Lorenzo Finn","Carlos Canal","Mathias Vacek","Marc Soler","Pau Miquel","Jenno Berckmoes","Stanisław Aniołkowski","Rick Pluimers","Markus Hoelgaard","Bryan Coquard","Jørgen Nordhagen","Valentin Madouas","Ethan Hayter","Kyrylo Tsarenko","Igor Arrieta","Marco Brenner","Erlend Blikra","Victor Langellotti","Yannis Voisard","Mikkel Frølich Honoré","Stian Fredheim","Stefan Bissegger","Maximilian Schachmann","Juan Sebastián Molano","Ion Izagirre","Nils Eekhoff","Alessandro Covi","Riley Sheehan","Jakob Söderqvist","Anthon Charmig","Sergio Higuita","Maxim Van Gils","Pablo Castrillo","Roger Adrià","Alberto Dainese","Kasper Asgreen","Mikkel Bjerg","Frederik Wandahl","Søren Kragh Andersen","Mathias Bregnhøj","Mads Würtz Schmidt","Asbjørn Hellemose","Mikkel Honoré"];
 
-var PLAYERS_DEFAULT = ["Emil","Christian","Dennis","Mathias","Anders","Tobias"];
-var TOP8 = ["Tadej Pogačar","Jonas Vingegaard","Isaac Del Toro","Mads Pedersen","João Almeida","Remco Evenepoel","Tom Pidcock","Mathieu van der Poel"];
-var danishRiders = ["Albert Withen Philipsen","Alexander Salby","Anders Halland Johannessen","Andreas Kron","Anthon Charmig","Asbjørn Hellemose","Casper Pedersen","Frederik Wandahl","Jonas Vingegaard","Kasper Asgreen","Mads Pedersen","Magnus Cort","Mathias Bregnhøj","Mattias Skjelmose","Mikkel Bjerg","Mikkel Frølich Honoré","Mikkel Honoré","Niklas Larsen","Søren Kragh Andersen","Søren Wærenskjold","Tobias Lund Andresen","Mads Würtz Schmidt"];
-var allRiders = ["Tadej Pogačar","Tim van Dijke","Aimé De Gendt","Isaac Del Toro","Jonas Vingegaard","Mads Pedersen","Remco Evenepoel","João Almeida","Mathieu Van Der Poel","Thomas Pidcock","Juan Ayuso","Wout Van Aert","Jay Vine","Ben Healy","Arnaud De Lie","Florian Lipowitz","Christian Scaroni","Oscar Onley","Giulio Ciccone","Felix Gall","Jasper Philipsen","Kévin Vauquelin","Paul Magnier","Mattias Skjelmose","Brandon Mcnulty","Jonathan Milan","Filippo Ganna","Michael Storer","Olav Kooij","Simon Yates","Matteo Jorgenson","Mauro Schmid","Michael Matthews","Matthew Brennan","Antonio Tiberi","Tim Merlier","Primož Roglič","Romain Grégoire","Derek Gee","Lenny Martinez","Richard Carapaz","Biniam Girmay","Egan Bernal","Giulio Pellizzari","Tobias Lund Andresen","Emilien Jeannière","Tobias Halland Johannessen","Neilson Powless","Jan Christen","Jai Hindley","Adam Yates","Thymen Arensman","Simone Velasco","Alex Aranburu","Julian Alaphilippe","Kaden Groves","Lorenzo Fortunato","Lukáš Kubiš","Luke Plapp","Tiesj Benoot","Paul Seixas","Quinn Simmons","Tim Wellens","Corbin Strong","Jordi Meeus","Matthew Riccitello","Søren Wærenskjold","Marc Hirschi","Orluis Aular","Pavel Bittner","Milan Fretin","Toms Skujiņš","Nicolas Prodhomme","Fred Wright","António Morgado","Harold Tejada","Enric Mas","Ben O'Connor","Florian Vermeersch","Dorian Godon","Ethan Vernon","Jonas Abrahamsen","Dylan Groenewegen","Ben Tulett","Ilan Van Wilder","Diego Ulissi","Iván Romeo","Matteo Moschetti","Pavel Sivakov","Damiano Caruso","Matteo Trentin","Harold Martín López","Samuel Watson","Yevgeniy Fedorov","Sepp Kuss","Clément Champoussin","Paul Lapeira","Max Kanter","Thibau Nys","Jasper Stuyven","Mike Teunissen","Magnus Cort","Dries De Bondt","Bastien Tronchon","Jon Barrenetxea","Laurenz Rex","Daan Hoole","Gianni Vermeersch","Anthony Turgis","Benoît Cosnefroy","Harry Sweeny","Nicolas Vinokurov","Arnaud Démare","Carlos Rodríguez","Rafał Majka","Alex Baudin","Fredrik Dversnes Lavik","Afonso Eulálio","Alexander Salby","Jenthe Biermans","Frank Van Den Broek","Maxime Decomble","Benjamin Thomas","Luke Lamperti","Fernando Barceló","Javier Romo","Matyáš Kopecký","Felix Engelhardt","Clément Berthet","Daniel Felipe Martínez","Pascal Ackermann","Matej Mohorič","Raúl García Pierna","Joris Delbove","Aleksandr Vlasov","Andrea Raccagni Noviero","Christophe Laporte","Steffen De Schuyteneer","Nikiforos Arvanitou","Nico Denz","Ivo Oliveira","Marcin Budziński","Max Poole","Eduard Prades","Lorenzo Quartucci","David De La Cruz","Alec Segaert","Jonas Rutsch","Cees Bol","Pau Martí","Laurence Pithie","Haimar Etxeberria","Stefan De Bod","Héctor Álvarez","Georg Zimmermann","Timo Kielich","Marijn Van Den Berg","Filippo Fiorelli","Luca Mozzato","Marius Mayrhofer","Alex Molenaar","Jakob Omrzel","Iván García Cortina","Valentin Paret-Peintre","David Gaudu","Iván Cobo","Casper Van Uden","Sakarias Koller Løland","Filippo Baroncini","Romain Bardet","Alexis Guerin","Sergio Geovani Chumil","Mattia Cattaneo","Brieuc Rolland","Wout Poels","Eddie Dunbar","Haoyu Su","Alessandro Fancellu","Marco Schrettl","Andreas Kron","Casper Pedersen","Gianmarco Garofoli","Dušan Rajović","Oded Kogut","José Manuel Díaz","Francesco Busatto","Vincenzo Albanese","Brent Van Moer","Nikita Tsvetkov","Rein Taaramäe","Clément Braz Afonso","Kevin Vermaerke","Pierre Gautherat","Victor Campenaerts","Abel Balderstone","Florian Stork","Gerben Thijssen","Archie Ryan","Chris Harper","Alexandre Mayer","Lennard Kämna","Léo Bisiaux","Guillermo Thomas Silva","Jordan Jegat","Alberto Bettiol","Jhonatan Narváez","Alexandre Delettre","Andrea Bagioli","Louis Barré","Andreas Leknessund","Stefan Küng","Johannes Kulset","Tibor Del Grosso","Mathys Rondel","Felix Großschartner","Lewis Askey","Mikel Landa","Henok Mulubrhan","Hugo Hofstetter","Pello Bilbao","Guillaume Martin","Magnus Sheffield","Davide Ballerini","Axel Laurance","Cian Uijtdebroeks","Santiago Buitrago","Matteo Malucelli","Clément Venturini","Sandy Dujardin","Anders Halland Johannessen","Marco Frigo","Cristián Rodríguez","Einer Rubio","Giovanni Lonardi","Fabio Christen","Davide Piganzoli","Edoardo Zambanini","Niklas Larsen","Albert Withen Philipsen","Natnael Tesfatsion","Rory Townsend","Danny Van Poppel","Ben Turner","Torstein Træen","Aurélien Paret-Peintre","Paul Double","Brady Gilmore","Phil Bauhaus","Madis Mihkels","Alexis Renard","Thibaud Gruel","Bruno Armirail","Paul Penhoët","Milan Menten","Filippo Zana","Aaron Gate","Jarno Widar","Alexander Kristoff","Quinten Hermans","Junior Lecerf","Joshua Tarling","Arne Marit","Matteo Sobrero","Ewen Costiou","Rasmus Tiller","Lennert Van Eetvelt","Andrea Vendrame","Lorenzo Finn","Carlos Canal","Mathias Vacek","Marc Soler","Pau Miquel","Jenno Berckmoes","Stanisław Aniołkowski","Rick Pluimers","Markus Hoelgaard","Bryan Coquard","Jørgen Nordhagen","Valentin Madouas","Ethan Hayter","Kyrylo Tsarenko","Igor Arrieta","Marco Brenner","Erlend Blikra","Victor Langellotti","Yannis Voisard","Mikkel Frølich Honoré","Stian Fredheim","Stefan Bissegger","Maximilian Schachmann","Juan Sebastián Molano","Ion Izagirre","Nils Eekhoff","Alessandro Covi","Riley Sheehan","Jakob Söderqvist","Anthon Charmig","Sergio Higuita","Maxim Van Gils","Pablo Castrillo","Roger Adrià","Alberto Dainese","Kasper Asgreen","Mikkel Bjerg","Frederik Wandahl","Søren Kragh Andersen","Mathias Bregnhøj","Mads Würtz Schmidt","Asbjørn Hellemose","Mikkel Honoré"];
+var AXEL_BONUS={5:-1,4:0,3:0,2:1,1:2,0:3};
+var BASE_POINTS=[6,4,3,2,1];
+var typeLabel={normal:"Normalt løb",monument:"🏛️ Monument",grandtour:"🏔️ Grand Tour-etape"};
+var typeBadge={normal:"badge-normal",monument:"badge-monument",grandtour:"badge-grandtour"};
+var typeBadgeLabel={normal:"Normalt",monument:"🏛️ Monument",grandtour:"🏔️ Grand Tour"};
 
-var AXEL_BONUS  = {5:-1,4:0,3:0,2:1,1:2,0:3};
-var BASE_POINTS = [6,4,3,2,1];
-var typeLabel   = {normal:"Normalt løb",monument:"🏛️ Monument",grandtour:"🏔️ Grand Tour-etape"};
-var typeBadge   = {normal:"badge-normal",monument:"badge-monument",grandtour:"badge-grandtour"};
-var typeBadgeLabel = {normal:"Normalt",monument:"🏛️ Monument",grandtour:"🏔️ Grand Tour"};
-
-var state = {
-  currentRound:1, currentPickIndex:0,
-  picks:{}, starRatings:{}, picksLocked:false, lockTimestamp:null,
-  roundLog:{}, seasonHistory:{},
-  players: PLAYERS_DEFAULT.map(function(n){ return {name:n,points:0}; })
+var state={
+  currentRound:1,currentPickIndex:0,
+  picks:{},starRatings:{},picksLocked:false,lockTimestamp:null,
+  roundLog:{},seasonHistory:{},raceFavorites:[],
+  players:PLAYERS_DEFAULT.map(function(n){return{name:n,points:0};})
 };
-var roundOrder=[], editingPlayer=null, selectedRider=null;
-var countdownInterval=null, isGM=false;
+var roundOrder=[],editingPlayer=null,selectedRider=null;
+var countdownInterval=null,isGM=false;
+var gmFavAcInstances=[],playerFavAcInstances=[];
+var pendingAcFields={};
 
-function $(id){ return document.getElementById(id); }
-function isTop8(r){ return TOP8.some(function(t){ return t.toLowerCase()===r.toLowerCase(); }); }
-function isDanish(r){ return danishRiders.some(function(d){ return d.toLowerCase()===r.toLowerCase(); }); }
-
-// Limits count ALL history entries including pending rounds
-function top8UsedCount(n){
-  return (state.seasonHistory[n]||[]).filter(function(e){ return isTop8(e.rider); }).length;
-}
-function fiveStarUsedCount(n){
-  return (state.seasonHistory[n]||[]).filter(function(e){ return e.stars===5; }).length;
-}
-
-function currentRace(){ return RACES[state.currentRound-1]||{name:"–",type:"normal",date:"–"}; }
+function $(id){return document.getElementById(id);}
+function isTop8(r){return TOP8.some(function(t){return t.toLowerCase()===r.toLowerCase();});}
+function isDanish(r){return danishRiders.some(function(d){return d.toLowerCase()===r.toLowerCase();});}
+function top8UsedCount(n){return(state.seasonHistory[n]||[]).filter(function(e){return isTop8(e.rider);}).length;}
+function fiveStarUsedCount(n){return(state.seasonHistory[n]||[]).filter(function(e){return e.stars===5;}).length;}
+function currentRace(){return RACES[state.currentRound-1]||{name:"–",type:"normal",date:"–"};}
+function getFavorites(){return state.raceFavorites||[];}
+function isFavorite(rider){return getFavorites().some(function(f){return f.toLowerCase()===rider.toLowerCase();});}
 
 function pendingRounds(){
-  return Object.keys(state.roundLog)
-    .filter(function(k){ return k!=="preview" && state.roundLog[k].pending; })
-    .map(Number).sort(function(a,b){ return a-b; });
+  return Object.keys(state.roundLog).filter(function(k){return k!=="preview"&&state.roundLog[k].pending;}).map(Number).sort(function(a,b){return a-b;});
 }
 
-var PLAYERS_ORDER = ["Emil","Christian","Dennis","Mathias","Anders","Tobias"];
-
+var PLAYERS_ORDER=["Emil","Christian","Dennis","Mathias","Anders","Tobias"];
 function buildRoundOrder(){
   var si=(state.currentRound-1)%PLAYERS_ORDER.length;
   roundOrder=PLAYERS_ORDER.map(function(_,i){
     var name=PLAYERS_ORDER[(si+i)%PLAYERS_ORDER.length];
-    return state.players.find(function(p){ return p.name===name; })||{name:name,points:0};
+    return state.players.find(function(p){return p.name===name;})||{name:name,points:0};
   });
 }
-function activePlayer(){ return roundOrder[state.currentPickIndex]; }
-function isLastPicked(n){ return state.currentPickIndex>0&&roundOrder[state.currentPickIndex-1]&&roundOrder[state.currentPickIndex-1].name===n; }
+function activePlayer(){return roundOrder[state.currentPickIndex];}
+function isLastPicked(n){return state.currentPickIndex>0&&roundOrder[state.currentPickIndex-1]&&roundOrder[state.currentPickIndex-1].name===n;}
 
 function setStatus(mode,text){
-  var dot=$("status-dot"),bar=$("status-text"); if(!dot||!bar) return;
+  var dot=$("status-dot"),bar=$("status-text");if(!dot||!bar)return;
   dot.className="status-dot"+(mode==="online"?"":mode==="offline"?" offline":" syncing");
   bar.textContent=text;
 }
@@ -598,136 +536,235 @@ function setStatus(mode,text){
 function saveState(){
   setStatus("syncing","Gemmer…");
   db.ref("gameState").set(JSON.parse(JSON.stringify(state)))
-    .then(function(){ setStatus("online","Gemt og synkroniseret ✓"); })
-    .catch(function(e){ setStatus("offline","Fejl: "+e.message); });
+    .then(function(){setStatus("online","Gemt og synkroniseret ✓");})
+    .catch(function(e){setStatus("offline","Fejl: "+e.message);});
 }
 
 function subscribeToState(){
-  db.ref("gameState").on("value", function(snap){
+  db.ref("gameState").on("value",function(snap){
     var data=snap.val();
-    if(!data){ setStatus("online","Forbundet – intet spil endnu"); buildRoundOrder(); renderAll(); return; }
-    state.currentRound     = data.currentRound     || 1;
-    state.currentPickIndex = data.currentPickIndex || 0;
-    state.picks            = data.picks            || {};
-    state.starRatings      = data.starRatings      || {};
-    state.picksLocked      = data.picksLocked      || false;
-    state.lockTimestamp    = data.lockTimestamp     || null;
-    state.roundLog         = data.roundLog         || {};
-    state.seasonHistory    = data.seasonHistory    || {};
-    state.players          = data.players          || PLAYERS_DEFAULT.map(function(n){ return {name:n,points:0}; });
-    buildRoundOrder();
-    restoreCountdown();
-    renderAll();
+    if(!data){setStatus("online","Forbundet – intet spil endnu");buildRoundOrder();renderAll();return;}
+    state.currentRound=data.currentRound||1;
+    state.currentPickIndex=data.currentPickIndex||0;
+    state.picks=data.picks||{};
+    state.starRatings=data.starRatings||{};
+    state.picksLocked=data.picksLocked||false;
+    state.lockTimestamp=data.lockTimestamp||null;
+    state.roundLog=data.roundLog||{};
+    state.seasonHistory=data.seasonHistory||{};
+    state.raceFavorites=data.raceFavorites||[];
+    state.players=data.players||PLAYERS_DEFAULT.map(function(n){return{name:n,points:0};});
+    buildRoundOrder();restoreCountdown();renderAll();
     setStatus("online","Live – synkroniseret ✓");
-  }, function(err){ setStatus("offline","Offline: "+err.message); });
+  },function(err){setStatus("offline","Offline: "+err.message);});
 }
 
 function restoreCountdown(){
-  if(countdownInterval) clearInterval(countdownInterval);
-  if(!state.lockTimestamp) return;
+  if(countdownInterval)clearInterval(countdownInterval);
+  if(!state.lockTimestamp)return;
   var rem=state.lockTimestamp-Date.now();
-  if(rem<=0){ state.picksLocked=true; renderPicksList(); return; }
+  if(rem<=0){state.picksLocked=true;renderPicksList();return;}
   tickCountdown(state.lockTimestamp);
 }
 
 function verifyGmCode(){
-  if($("gm-code-input").value!==GM_CODE){ $("gm-login-error").textContent="⛔ Forkert kode!"; return; }
-  $("gm-overlay").style.display="none"; isGM=true; renderGmTab();
+  if($("gm-code-input").value!==GM_CODE){$("gm-login-error").textContent="⛔ Forkert kode!";return;}
+  $("gm-overlay").style.display="none";isGM=true;renderGmTab();
 }
-function closeGmOverlay(){ $("gm-overlay").style.display="none"; switchTab("player"); }
-function gmLogout(){ isGM=false; switchTab("player"); }
+function closeGmOverlay(){$("gm-overlay").style.display="none";switchTab("player");}
+function gmLogout(){isGM=false;switchTab("player");}
 
 function switchTab(tab){
-  document.querySelectorAll(".tab-content").forEach(function(el){ el.classList.remove("active"); });
-  document.querySelectorAll(".tab").forEach(function(el){ el.classList.remove("active"); });
+  document.querySelectorAll(".tab-content").forEach(function(el){el.classList.remove("active");});
+  document.querySelectorAll(".tab").forEach(function(el){el.classList.remove("active");});
   $("tab-"+tab).classList.add("active");
   var idx=["player","standings","stats","calendar","rules","gm"].indexOf(tab);
   document.querySelectorAll(".tab")[idx].classList.add("active");
   if(tab==="gm"){
-    if(!isGM){ $("gm-overlay").style.display="flex"; $("gm-code-input").value=""; $("gm-login-error").textContent=""; return; }
+    if(!isGM){$("gm-overlay").style.display="flex";$("gm-code-input").value="";$("gm-login-error").textContent="";return;}
     renderGmTab();
   }
-  if(tab==="standings"){ renderStandings(); renderLimitsStandings(); }
-  if(tab==="calendar"){ renderCalendar(); }
-  if(tab==="stats"){ renderStats(); }
+  if(tab==="standings"){renderStandings();renderLimitsStandings();}
+  if(tab==="calendar"){renderCalendar();}
+  if(tab==="stats"){renderStats();}
 }
-function renderGmTab(){ updateRaceDisplay(); renderStarTable(); renderLimitsTable(); renderHistory(); renderGmPending(); }
+function renderGmTab(){updateRaceDisplay();renderGmFavorites();renderGmPending();renderStarTable();renderLimitsTable();renderHistory();}
 
+// === AUTOCOMPLETE ===
 function setupAutocomplete(input,ulEl,opts){
-  opts=opts||{}; var chosen=null;
-  input.addEventListener("input",function(){ chosen=null; input.classList.remove("selected"); showList(input.value.trim()); });
-  input.addEventListener("focus",function(){ if(input.value.trim()) showList(input.value.trim()); });
-  document.addEventListener("click",function(e){ if(!input.contains(e.target)&&!ulEl.contains(e.target)) ulEl.style.display="none"; });
+  opts=opts||{};var chosen=null;
+  input.addEventListener("input",function(){chosen=null;input.classList.remove("selected");showList(input.value.trim());});
+  input.addEventListener("focus",function(){if(input.value.trim())showList(input.value.trim());});
+  document.addEventListener("click",function(e){if(!input.contains(e.target)&&!ulEl.contains(e.target))ulEl.style.display="none";});
   ulEl.addEventListener("click",function(e){
     var li=e.target.closest("li");
-    if(!li||li.classList.contains("taken")||li.classList.contains("blocked")) return;
-    chosen=li.dataset.name; input.value=chosen; input.classList.add("selected");
-    ulEl.style.display="none"; if(opts.onSelect) opts.onSelect(chosen);
+    if(!li||li.classList.contains("taken")||li.classList.contains("blocked"))return;
+    chosen=li.dataset.name;input.value=chosen;input.classList.add("selected");
+    ulEl.style.display="none";if(opts.onSelect)opts.onSelect(chosen);
   });
   function showList(query){
-    if(!query){ ulEl.style.display="none"; return; }
+    if(!query){ulEl.style.display="none";return;}
     var pool=opts.pool||allRiders;
-    var filtered=pool.filter(function(r){ return r.toLowerCase().includes(query.toLowerCase()); });
+    var filtered=pool.filter(function(r){return r.toLowerCase().includes(query.toLowerCase());});
     var items=filtered.map(function(r){
       var taken=opts.takenCheck?opts.takenCheck(r):false;
       var blocked=opts.blockedCheck?opts.blockedCheck(r):false;
       var suffix=taken?" (allerede valgt)":blocked?" (grænse nået)":"";
-      if(!taken&&!blocked&&isTop8(r)) suffix=" 🌟 Top-8";
+      if(!taken&&!blocked&&isTop8(r))suffix=" 🌟 Top-8";
+      if(!taken&&!blocked&&isFavorite(r))suffix=" ⭐⭐⭐⭐⭐";
       return '<li class="'+(taken?"taken":blocked?"blocked":"")+'" data-name="'+r+'">'+r+suffix+"</li>";
     });
-    var exact=pool.some(function(r){ return r.toLowerCase()===query.toLowerCase(); });
-    if(!exact&&query.length>2) items.push('<li data-name="'+query+'" style="color:var(--muted);font-style:italic">➕ Brug "'+query+'"</li>');
+    var exact=pool.some(function(r){return r.toLowerCase()===query.toLowerCase();});
+    if(!exact&&query.length>2)items.push('<li data-name="'+query+'" style="color:var(--muted);font-style:italic">➕ Brug "'+query+'"</li>');
     ulEl.innerHTML=items.join("")||'<li style="color:var(--muted);cursor:default">Ingen resultater</li>';
     ulEl.style.display="block";
   }
-  return {
-    getValue:function(){ return chosen||input.value.trim()||null; },
-    setValue:function(v){ input.value=v; chosen=v; input.classList.add("selected"); },
-    clear:function(){ input.value=""; chosen=null; input.classList.remove("selected"); }
+  return{
+    getValue:function(){return chosen||input.value.trim()||null;},
+    setValue:function(v){input.value=v;chosen=v;input.classList.add("selected");},
+    clear:function(){input.value="";chosen=null;input.classList.remove("selected");}
   };
 }
 
+// === FAVORITTER ===
+function makeAcRow(container,placeholder,acList){
+  var wrap=document.createElement("div");
+  wrap.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:6px";
+  var acWrap=document.createElement("div");
+  acWrap.className="ac-wrap";acWrap.style.cssText="flex:1;margin-bottom:0";
+  var inp=document.createElement("input");
+  inp.placeholder=placeholder;inp.autocomplete="off";
+  var ul=document.createElement("ul");
+  ul.className="ac-list";ul.style.display="none";
+  acWrap.appendChild(inp);acWrap.appendChild(ul);
+  var removeBtn=document.createElement("button");
+  removeBtn.className="btn danger small";removeBtn.style.marginTop="0";removeBtn.textContent="✕";
+  removeBtn.onclick=function(){wrap.remove();};
+  wrap.appendChild(acWrap);wrap.appendChild(removeBtn);
+  container.appendChild(wrap);
+  var ac=setupAutocomplete(inp,ul,{});
+  acList.push({wrap:wrap,ac:ac});
+  return ac;
+}
+
+function renderGmFavorites(){
+  var container=$("gm-favorites-list");if(!container)return;
+  gmFavAcInstances=[];
+  var favs=getFavorites();
+  // Show saved favorites as badges
+  var savedHTML=favs.map(function(f,i){
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+
+      '<span style="flex:1;padding:7px 12px;background:var(--accent-bg);border:1.5px solid var(--accent);border-radius:10px;font-size:0.9rem;font-weight:600">⭐⭐⭐⭐⭐ '+f+'</span>'+
+      '<button class="btn danger small" style="margin-top:0" onclick="removeFavorite('+i+')">✕</button>'+
+    '</div>';
+  }).join("");
+  container.innerHTML=savedHTML;
+  // One default empty input row
+  makeAcRow(container,"Søg rytter...",gmFavAcInstances);
+}
+
+function addFavoriteRow(){
+  makeAcRow($("gm-favorites-list"),"Søg rytter...",gmFavAcInstances);
+}
+
+function saveFavorites(){
+  var favs=getFavorites().slice();
+  gmFavAcInstances.forEach(function(inst){
+    if(!document.body.contains(inst.wrap))return;
+    var v=inst.ac.getValue();
+    if(v&&!favs.some(function(f){return f.toLowerCase()===v.toLowerCase();}))favs.push(v);
+  });
+  gmFavAcInstances=[];
+  state.raceFavorites=favs;
+  saveState();renderGmFavorites();applyFavoritesToStarRatings();renderStarTable();
+  alert("✅ Favoritter gemt: "+(favs.join(", ")||"(ingen)"));
+}
+
+function removeFavorite(idx){
+  var favs=getFavorites();favs.splice(idx,1);
+  state.raceFavorites=favs;saveState();renderGmFavorites();renderStarTable();
+}
+
+function applyFavoritesToStarRatings(){
+  Object.entries(state.picks).forEach(function(kv){
+    var pName=kv[0],rider=kv[1];
+    if(isFavorite(rider)&&state.starRatings[pName]==null)state.starRatings[pName]=5;
+  });
+}
+
+// Player fallback favorites
+function renderFavoritesPlayerBox(){
+  var box=$("favorites-player-box");if(!box)return;
+  var favs=getFavorites();
+  var show=favs.length===0&&state.currentPickIndex===0&&Object.keys(state.picks).length===0;
+  box.style.display=show?"block":"none";
+  if(show){
+    var container=$("player-favorites-list");
+    if(container&&container.children.length===0){
+      playerFavAcInstances=[];
+      makeAcRow(container,"Søg 5-stjernet rytter...",playerFavAcInstances);
+    }
+  }
+}
+
+function addPlayerFavoriteRow(){
+  makeAcRow($("player-favorites-list"),"Søg 5-stjernet rytter...",playerFavAcInstances);
+}
+
+function savePlayerFavorites(){
+  var favs=[];
+  playerFavAcInstances.forEach(function(inst){
+    if(!document.body.contains(inst.wrap))return;
+    var v=inst.ac.getValue();
+    if(v&&!favs.some(function(f){return f.toLowerCase()===v.toLowerCase();}))favs.push(v);
+  });
+  if(!favs.length){alert("⚠️ Tilføj mindst én favorit, eller spring over.");return;}
+  state.raceFavorites=favs;saveState();
+  $("favorites-player-box").style.display="none";
+  alert("✅ Favoritter gemt: "+favs.join(", "));
+}
+
+// === SPILLERVALG ===
 var playerAC=setupAutocomplete($("search-input"),$("suggestions"),{
-  takenCheck:function(r){ return Object.entries(state.picks).some(function(e){ return e[1]===r&&e[0]!==editingPlayer; }); },
+  takenCheck:function(r){return Object.entries(state.picks).some(function(e){return e[1]===r&&e[0]!==editingPlayer;});},
   blockedCheck:function(r){
-    if(!state.players||!roundOrder.length) return false;
+    if(!state.players||!roundOrder.length)return false;
     var pName=editingPlayer||(state.currentPickIndex<state.players.length?activePlayer().name:null);
-    if(!pName||!isTop8(r)) return false;
-    if(top8UsedCount(pName)>=4) return true;
-    return (state.seasonHistory[pName]||[]).some(function(e){ return e.rider.toLowerCase()===r.toLowerCase(); });
+    if(!pName||!isTop8(r))return false;
+    if(top8UsedCount(pName)>=4)return true;
+    return(state.seasonHistory[pName]||[]).some(function(e){return e.rider.toLowerCase()===r.toLowerCase();});
   },
-  onSelect:function(name){ selectedRider=name; }
+  onSelect:function(name){selectedRider=name;}
 });
-$("search-input").addEventListener("input",function(){ selectedRider=null; });
+$("search-input").addEventListener("input",function(){selectedRider=null;});
 
 function handleConfirm(){
   var err=$("error-msg");
   selectedRider=playerAC.getValue();
-  if(!selectedRider){ err.textContent="⚠️ Vælg en rytter fra listen først."; return; }
-  if(!state.players||!roundOrder.length){ err.textContent="⚠️ Spillet er ikke klar endnu."; return; }
+  if(!selectedRider){err.textContent="⚠️ Vælg en rytter fra listen først.";return;}
+  if(!state.players||!roundOrder.length){err.textContent="⚠️ Spillet er ikke klar endnu.";return;}
   var pName=editingPlayer||activePlayer().name;
   if(isTop8(selectedRider)){
-    if(top8UsedCount(pName)>=4){ err.textContent="⛔ Max 4 Top-8 valg per sæson."; return; }
-    if((state.seasonHistory[pName]||[]).some(function(e){ return e.rider.toLowerCase()===selectedRider.toLowerCase(); })){ err.textContent="⛔ Du har allerede valgt "+selectedRider+"."; return; }
+    if(top8UsedCount(pName)>=4){err.textContent="⛔ Max 4 Top-8 valg per sæson.";return;}
+    if((state.seasonHistory[pName]||[]).some(function(e){return e.rider.toLowerCase()===selectedRider.toLowerCase();})){err.textContent="⛔ Du har allerede valgt "+selectedRider+".";return;}
   }
-  if(Object.entries(state.picks).some(function(e){ return e[1]===selectedRider&&e[0]!==editingPlayer; })){ err.textContent="⚠️ Den rytter er allerede valgt!"; return; }
+  if(Object.entries(state.picks).some(function(e){return e[1]===selectedRider&&e[0]!==editingPlayer;})){err.textContent="⚠️ Den rytter er allerede valgt!";return;}
   if(editingPlayer){
-    state.picks[editingPlayer]=selectedRider; editingPlayer=null;
+    state.picks[editingPlayer]=selectedRider;editingPlayer=null;
     $("confirm-btn").textContent="✅ Bekræft valg";
   } else {
     state.picks[activePlayer().name]=selectedRider;
-    state.starRatings[activePlayer().name]=null;
+    state.starRatings[activePlayer().name]=isFavorite(selectedRider)?5:null;
     state.currentPickIndex++;
-    if(state.currentPickIndex>=state.players.length) startCountdown();
+    if(state.currentPickIndex>=state.players.length)startCountdown();
   }
-  selectedRider=null; err.textContent="";
-  saveState(); renderPicksList(); renderOrder(); renderPickBox();
+  selectedRider=null;err.textContent="";
+  saveState();renderPicksList();renderOrder();renderPickBox();
 }
-
-$("confirm-btn").addEventListener("click", handleConfirm);
+$("confirm-btn").addEventListener("click",handleConfirm);
 
 function startEdit(playerName){
-  if(!isLastPicked(playerName)||state.picksLocked) return;
+  if(!isLastPicked(playerName)||state.picksLocked)return;
   editingPlayer=playerName;
   $("confirm-btn").textContent="✅ Gem ændring";
   $("pick-box").querySelector(".turn-label").innerHTML="✏️ <span class='turn-name'>"+playerName+"</span> redigerer sit valg";
@@ -736,46 +773,46 @@ function startEdit(playerName){
   $("pick-box").scrollIntoView({behavior:"smooth"});
 }
 
-function startCountdown(){
-  var lt=Date.now()+15*60*1000; state.lockTimestamp=lt; tickCountdown(lt);
-}
+// === COUNTDOWN ===
+function startCountdown(){var lt=Date.now()+15*60*1000;state.lockTimestamp=lt;tickCountdown(lt);}
 function tickCountdown(lt){
-  if(countdownInterval) clearInterval(countdownInterval);
+  if(countdownInterval)clearInterval(countdownInterval);
   var box=$("countdown-box"),timer=$("countdown-timer"),label=$("countdown-label");
-  box.style.display="block"; box.className="countdown-box active";
+  box.style.display="block";box.className="countdown-box active";
   label.textContent="⏳ Tid tilbage til valg låses";
   countdownInterval=setInterval(function(){
     var rem=Math.max(0,Math.round((lt-Date.now())/1000));
     timer.textContent=String(Math.floor(rem/60)).padStart(2,"0")+":"+String(rem%60).padStart(2,"0");
     if(rem===0){
-      clearInterval(countdownInterval); state.picksLocked=true;
-      box.className="countdown-box locked";
-      label.textContent="🔒 Valg er låst – kun GM kan ændre";
-      renderPicksList(); saveState();
+      clearInterval(countdownInterval);state.picksLocked=true;
+      box.className="countdown-box locked";label.textContent="🔒 Valg er låst – kun GM kan ændre";
+      renderPicksList();saveState();
     }
   },1000);
 }
 
+// === GM OVERRIDE ===
 function startGmOverride(playerName){
   var existing=$("override-"+playerName);
-  if(existing){ existing.classList.toggle("open"); return; }
+  if(existing){existing.classList.toggle("open");return;}
   var row=$("star-row-"+playerName);
   var wrap=document.createElement("div");
-  wrap.className="override-wrap open"; wrap.id="override-"+playerName;
+  wrap.className="override-wrap open";wrap.id="override-"+playerName;
   wrap.innerHTML='<p style="font-size:0.84rem;color:var(--muted);margin-bottom:8px">⚠️ Ændr valg for <strong>'+playerName+'</strong></p><div class="ac-wrap"><input placeholder="Søg ny rytter..." autocomplete="off" value="'+(state.picks[playerName]||"")+'"><ul class="ac-list" style="display:none"></ul></div><button class="btn danger small" onclick="confirmGmOverride(\''+playerName+'\')">💾 Gem</button>';
   row.after(wrap);
-  var inp=wrap.querySelector("input"); inp.classList.add("selected");
-  setupAutocomplete(inp,wrap.querySelector(".ac-list"),{takenCheck:function(r){ return Object.entries(state.picks).some(function(e){ return e[1]===r&&e[0]!==playerName; }); }});
+  var inp=wrap.querySelector("input");inp.classList.add("selected");
+  setupAutocomplete(inp,wrap.querySelector(".ac-list"),{takenCheck:function(r){return Object.entries(state.picks).some(function(e){return e[1]===r&&e[0]!==playerName;});}});
 }
 function confirmGmOverride(playerName){
   var wrap=$("override-"+playerName);
   var newRider=wrap.querySelector("input").value.trim();
-  if(!newRider) return;
-  if(Object.entries(state.picks).some(function(e){ return e[1]===newRider&&e[0]!==playerName; })){ alert("⚠️ Den rytter er allerede valgt."); return; }
-  state.picks[playerName]=newRider; wrap.classList.remove("open");
-  saveState(); renderPicksList(); renderStarTable();
+  if(!newRider)return;
+  if(Object.entries(state.picks).some(function(e){return e[1]===newRider&&e[0]!==playerName;})){alert("⚠️ Den rytter er allerede valgt.");return;}
+  state.picks[playerName]=newRider;wrap.classList.remove("open");
+  saveState();renderPicksList();renderStarTable();
 }
 
+// === POINT ===
 var gmFields=["p1","p2","p3","p4","p5"].map(function(id){
   var wrap=$("wrap-"+id);
   return setupAutocomplete(wrap.querySelector("input"),wrap.querySelector(".ac-list"));
@@ -788,18 +825,17 @@ function calcRoundPoints(top5Lower,entries,raceType){
     var pName=kv[0],rider=kv[1].rider,stars=kv[1].stars;
     var pos=top5Lower.indexOf(rider.toLowerCase());
     var inTop5=pos>=0;
-    // Axelgaard: -1 for 5 stjerner gælder ALTID, bonus for 0-2 stjerner kun hvis i top 5
     var axelBonus=0;
-    if(stars===5) axelBonus=-1;
-    else if(inTop5&&stars!=null) axelBonus=AXEL_BONUS[stars];
+    if(stars===5)axelBonus=-1;
+    else if(inTop5&&stars!=null)axelBonus=AXEL_BONUS[stars];
     var base=inTop5?BASE_POINTS[pos]:0;
     var danish=inTop5&&isDanish(rider)?1:0;
     var multi=isDouble?2:1;
     var points=(base+axelBonus+danish)*multi;
     var parts=[inTop5?"Grundpoint: "+base:"Ikke i top 5"];
-    if(axelBonus!==0) parts.push("Axelgaard ("+stars+"⭐): "+(axelBonus>0?"+":"")+axelBonus);
-    if(danish) parts.push("🇩🇰 +1");
-    if(isDouble&&points!==0) parts.push("⚡ ×2");
+    if(axelBonus!==0)parts.push("Axelgaard ("+stars+"⭐): "+(axelBonus>0?"+":"")+axelBonus);
+    if(danish)parts.push("🇩🇰 +1");
+    if(isDouble&&points!==0)parts.push("⚡ ×2");
     parts.push("= <strong>"+points+" point</strong>");
     result[pName]={rider:rider,stars:stars,points:points,log:parts.join(" | ")};
   });
@@ -808,173 +844,135 @@ function calcRoundPoints(top5Lower,entries,raceType){
 
 $("calc-btn").addEventListener("click",function(){
   var r=currentRace();
-  var top5=gmFields.map(function(f){ return (f.getValue()||"").toLowerCase(); });
+  var top5=gmFields.map(function(f){return(f.getValue()||"").toLowerCase();});
   var axelLink=$("axel-link").value.trim();
   var entries={};
-  state.players.forEach(function(p){ if(state.picks[p.name]) entries[p.name]={rider:state.picks[p.name],stars:state.starRatings[p.name]!=null?state.starRatings[p.name]:null}; });
+  state.players.forEach(function(p){if(state.picks[p.name])entries[p.name]={rider:state.picks[p.name],stars:state.starRatings[p.name]!=null?state.starRatings[p.name]:null};});
   var computed=calcRoundPoints(top5,entries,r.type);
   state.roundLog["preview"]={raceName:r.name,raceType:r.type,top5:top5,axelLink:axelLink,entries:computed};
-  var log=$("point-log"); log.innerHTML="";
+  var log=$("point-log");log.innerHTML="";
   state.players.forEach(function(p){
-    var entry=computed[p.name]; if(!entry) return;
+    var entry=computed[p.name];if(!entry)return;
     var li=document.createElement("li");
     li.className=entry.points>0?"plus":"zero";
     li.innerHTML="<strong>"+p.name+"</strong> ("+entry.rider+"): "+entry.log;
     log.appendChild(li);
   });
-  recalcTotalPoints();
-  state.players.sort(function(a,b){ return b.points-a.points; });
-  renderStandings(); renderMiniStandings(); renderLimitsTable(); renderLimitsStandings();
+  recalcTotalPoints();state.players.sort(function(a,b){return b.points-a.points;});
+  renderStandings();renderMiniStandings();renderLimitsTable();renderLimitsStandings();
 });
 
 $("next-round-btn").addEventListener("click",function(){
   var r=currentRace();
-  if(!confirm("Afslut runde "+state.currentRound+" ("+r.name+") og start runde "+(state.currentRound+1)+"?")) return;
-  finalizeRound(state.currentRound, false);
+  if(!confirm("Afslut runde "+state.currentRound+" ("+r.name+") og start runde "+(state.currentRound+1)+"?"))return;
+  finalizeRound(state.currentRound,false);
 });
 
 $("pending-round-btn").addEventListener("click",function(){
   var r=currentRace();
-  if(!confirm('Gem runde '+state.currentRound+' ('+r.name+') som "Afventer resultat" og start runde '+(state.currentRound+1)+'?')) return;
-  finalizeRound(state.currentRound, true);
+  if(!confirm("Gem runde "+state.currentRound+" ("+r.name+") som Afventer resultat og start runde "+(state.currentRound+1)+"?"))return;
+  finalizeRound(state.currentRound,true);
 });
 
-function finalizeRound(rNum, isPending){
+function finalizeRound(rNum,isPending){
   var r=currentRace();
   var preview=state.roundLog["preview"];
-
   if(isPending){
     var pendingEntries={};
     state.players.forEach(function(p){
-      if(state.picks[p.name]){
-        pendingEntries[p.name]={
-          rider: state.picks[p.name],
-          stars: state.starRatings[p.name]!=null ? state.starRatings[p.name] : null,
-          points: 0,
-          log: "Afventer resultat"
-        };
-      }
+      if(state.picks[p.name])pendingEntries[p.name]={rider:state.picks[p.name],stars:state.starRatings[p.name]!=null?state.starRatings[p.name]:null,points:0,log:"Afventer resultat"};
     });
-    state.roundLog[rNum]={
-      raceName: r.name, raceType: r.type,
-      top5: [], axelLink: preview ? preview.axelLink : "",
-      entries: pendingEntries, pending: true
-    };
-    // Add to seasonHistory immediately — limits count straight away
+    state.roundLog[rNum]={raceName:r.name,raceType:r.type,top5:[],axelLink:preview?preview.axelLink:"",entries:pendingEntries,pending:true};
     state.players.forEach(function(p){
       var e=state.roundLog[rNum].entries[p.name];
-      if(e){
-        if(!state.seasonHistory[p.name]) state.seasonHistory[p.name]=[];
-        state.seasonHistory[p.name].push({rider:e.rider, stars:e.stars, roundNum:rNum});
-      }
+      if(e){if(!state.seasonHistory[p.name])state.seasonHistory[p.name]=[];state.seasonHistory[p.name].push({rider:e.rider,stars:e.stars,roundNum:rNum});}
     });
   } else {
-    if(preview){ state.roundLog[rNum]=preview; delete state.roundLog["preview"]; }
-    else{ state.roundLog[rNum]={raceName:r.name,raceType:r.type,top5:[],axelLink:"",entries:{}}; }
+    if(preview){state.roundLog[rNum]=preview;delete state.roundLog["preview"];}
+    else{state.roundLog[rNum]={raceName:r.name,raceType:r.type,top5:[],axelLink:"",entries:{}};}
     state.players.forEach(function(p){
       var e=state.roundLog[rNum].entries[p.name];
-      if(e){
-        if(!state.seasonHistory[p.name]) state.seasonHistory[p.name]=[];
-        state.seasonHistory[p.name].push({rider:e.rider, stars:e.stars, roundNum:rNum});
-      }
+      if(e){if(!state.seasonHistory[p.name])state.seasonHistory[p.name]=[];state.seasonHistory[p.name].push({rider:e.rider,stars:e.stars,roundNum:rNum});}
     });
   }
-
-  state.currentRound++; state.currentPickIndex=0;
-  state.picks={}; state.starRatings={}; state.picksLocked=false; state.lockTimestamp=null; editingPlayer=null;
-  if(countdownInterval) clearInterval(countdownInterval);
-  $("countdown-box").style.display="none"; $("point-log").innerHTML=""; $("axel-link").value="";
-  gmFields.forEach(function(f){ f.clear(); });
-  recalcTotalPoints(); state.players.sort(function(a,b){ return b.points-a.points; });
-  buildRoundOrder(); saveState(); renderAll(); switchTab("player");
+  state.currentRound++;state.currentPickIndex=0;
+  state.picks={};state.starRatings={};state.picksLocked=false;state.lockTimestamp=null;
+  state.raceFavorites=[];editingPlayer=null;
+  if(countdownInterval)clearInterval(countdownInterval);
+  $("countdown-box").style.display="none";$("point-log").innerHTML="";$("axel-link").value="";
+  gmFields.forEach(function(f){f.clear();});
+  recalcTotalPoints();state.players.sort(function(a,b){return b.points-a.points;});
+  buildRoundOrder();saveState();renderAll();switchTab("player");
 }
 
 function recalcTotalPoints(){
   state.players.forEach(function(p){
-    p.points=Object.keys(state.roundLog).filter(function(k){ return k!=="preview"; }).reduce(function(s,k){
+    p.points=Object.keys(state.roundLog).filter(function(k){return k!=="preview";}).reduce(function(s,k){
       var entry=state.roundLog[k].entries[p.name];
-      if(!entry || state.roundLog[k].pending) return s; // pending = 0 point indtil løst
+      if(!entry||state.roundLog[k].pending)return s;
       return s+entry.points;
     },0);
   });
 }
 
-// === RESOLVE PENDING – called from GM pending section ===
+// === RESOLVE PENDING ===
 function resolvePendingRound(rNum){
   var acs=pendingAcFields[rNum];
-  var newTop5=acs ? acs.map(function(ac){ return (ac.getValue()||"").toLowerCase(); }) : [];
+  var newTop5=acs?acs.map(function(ac){return(ac.getValue()||"").toLowerCase();}):[];
   var starInputs=document.querySelectorAll('.pending-star-input[data-round="'+rNum+'"]');
   var round=state.roundLog[rNum];
-
   var baseEntries={};
-  Object.entries(round.entries).forEach(function(kv){
-    baseEntries[kv[0]]={rider:kv[1].rider, stars:kv[1].stars};
-  });
+  Object.entries(round.entries).forEach(function(kv){baseEntries[kv[0]]={rider:kv[1].rider,stars:kv[1].stars};});
   starInputs.forEach(function(sel){
     var pName=sel.dataset.player;
-    if(baseEntries[pName]) baseEntries[pName].stars=sel.value===""?null:parseInt(sel.value);
+    if(baseEntries[pName])baseEntries[pName].stars=sel.value===""?null:parseInt(sel.value);
   });
-
   var recomputed=calcRoundPoints(newTop5,baseEntries,round.raceType);
-  state.roundLog[rNum]=Object.assign({},round,{top5:newTop5, entries:recomputed, pending:false});
-
-  // Update seasonHistory for this round (remove pending, update stars)
+  state.roundLog[rNum]=Object.assign({},round,{top5:newTop5,entries:recomputed,pending:false});
   state.players.forEach(function(p){
     var hist=state.seasonHistory[p.name]||[];
     var idx=-1;
-    for(var i=0;i<hist.length;i++){ if(hist[i].roundNum===rNum){ idx=i; break; } }
+    for(var i=0;i<hist.length;i++){if(hist[i].roundNum===rNum){idx=i;break;}}
     var ne=recomputed[p.name];
-    if(idx>=0){
-      hist[idx]={rider:hist[idx].rider, stars:ne?ne.stars:hist[idx].stars, roundNum:rNum};
-    } else if(ne){
-      hist.push({rider:ne.rider, stars:ne.stars, roundNum:rNum});
-    }
+    if(idx>=0){hist[idx]={rider:hist[idx].rider,stars:ne?ne.stars:hist[idx].stars,roundNum:rNum};}
+    else if(ne){hist.push({rider:ne.rider,stars:ne.stars,roundNum:rNum});}
     state.seasonHistory[p.name]=hist;
   });
-
-  recalcTotalPoints(); state.players.sort(function(a,b){ return b.points-a.points; });
-  saveState();
-  renderAll();
-  if(isGM) renderGmTab();
-  alert("✅ Runde "+rNum+" løst! Point er nu beregnet og stillingen opdateret.");
+  recalcTotalPoints();state.players.sort(function(a,b){return b.points-a.points;});
+  saveState();renderAll();if(isGM)renderGmTab();
+  alert("✅ Runde "+rNum+" løst! Point er nu beregnet.");
 }
 
 // === GM PENDING PANEL ===
-// Store AC instances for pending panels keyed by rNum
-var pendingAcFields = {};
-
 function renderGmPending(){
   var pending=pendingRounds();
   var section=$("gm-pending-section");
-  if(!pending.length){ section.style.display="none"; return; }
+  if(!pending.length){section.style.display="none";return;}
   section.style.display="block";
   var list=$("gm-pending-list");
+  pendingAcFields={};
   list.innerHTML=pending.map(function(rNum){
     var r=state.roundLog[rNum];
     var tl={normal:"",monument:"🏛️ ",grandtour:"🏔️ "}[r.raceType]||"";
-    var posLabels=["🥇","🥈","🥉","4.","5."];
     return '<div class="pending-result-item">'+
       '<h4>'+tl+r.raceName+' <span style="font-size:0.8rem;color:var(--muted)">(Runde '+rNum+')</span></h4>'+
       '<p style="font-size:0.84rem;color:var(--muted);margin-bottom:10px">'+
-        Object.entries(r.entries).map(function(kv){ return '<strong>'+kv[0]+'</strong>: '+kv[1].rider; }).join(' · ')+
+        Object.entries(r.entries).map(function(kv){return'<strong>'+kv[0]+'</strong>: '+kv[1].rider;}).join(' · ')+
       '</p>'+
       '<button class="btn pending small" onclick="togglePendingResolve('+rNum+')">🕐 Udfyld resultat</button>'+
       '<div class="pending-resolve-panel" id="pending-panel-'+rNum+'">'+
         '<p style="font-size:0.84rem;font-weight:600;color:var(--pending);margin-bottom:10px">Top 5 for '+r.raceName+'</p>'+
         [0,1,2,3,4].map(function(i){
-          return '<div class="result-row">'+
-            '<label>'+posLabels[i]+'</label>'+
+          return '<div class="result-row"><label>'+["🥇","🥈","🥉","4.","5."][i]+'</label>'+
             '<div class="ac-wrap" id="pending-ac-wrap-'+rNum+'-'+i+'" style="flex:1;margin-bottom:0">'+
               '<input id="pending-ac-input-'+rNum+'-'+i+'" placeholder="Søg rytter..." autocomplete="off">'+
               '<ul class="ac-list" id="pending-ac-list-'+rNum+'-'+i+'" style="display:none"></ul>'+
-            '</div>'+
-          '</div>';
+            '</div></div>';
         }).join("")+
         '<p style="font-size:0.84rem;font-weight:600;color:var(--pending);margin:12px 0 8px">Stjerner per spiller</p>'+
         Object.entries(r.entries).map(function(kv){
           var pName=kv[0],e=kv[1];
-          return '<div class="result-row" style="margin-bottom:6px">'+
-            '<label style="padding-top:6px">'+pName+'</label>'+
+          return '<div class="result-row" style="margin-bottom:6px"><label style="padding-top:6px">'+pName+'</label>'+
             '<select class="pending-star-input" data-round="'+rNum+'" data-player="'+pName+'" style="flex:1;padding:7px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem">'+
             '<option value="" '+(e.stars==null?"selected":"")+'>– Ikke tildelt –</option>'+
             '<option value="5" '+(e.stars===5?"selected":"")+'>⭐⭐⭐⭐⭐ (−1)</option>'+
@@ -985,46 +983,41 @@ function renderGmPending(){
             '<option value="0" '+(e.stars===0?"selected":"")+'>Ikke nævnt (+3)</option>'+
             '</select></div>';
         }).join("")+
-        '<button class="btn pending" style="margin-top:10px" onclick="resolvePendingRound('+rNum+')">✅ Bekræft resultat & beregn point</button>'+
-      '</div>'+
-    '</div>';
+        '<button class="btn pending" style="margin-top:10px" onclick="resolvePendingRound('+rNum+')">✅ Bekræft resultat og beregn point</button>'+
+      '</div></div>';
   }).join("");
-
-  // Bind autocomplete AFTER HTML is in DOM
+  // Bind autocomplete after HTML is in DOM
   pending.forEach(function(rNum){
-    pendingAcFields[rNum] = [0,1,2,3,4].map(function(i){
-      var inp = $("pending-ac-input-"+rNum+"-"+i);
-      var ul  = $("pending-ac-list-"+rNum+"-"+i);
-      return setupAutocomplete(inp, ul, {});
+    pendingAcFields[rNum]=[0,1,2,3,4].map(function(i){
+      var inp=$("pending-ac-input-"+rNum+"-"+i);
+      var ul=$("pending-ac-list-"+rNum+"-"+i);
+      return setupAutocomplete(inp,ul,{});
     });
   });
 }
 
 function togglePendingResolve(rNum){
   var panel=$("pending-panel-"+rNum);
-  if(panel) panel.classList.toggle("open");
+  if(panel)panel.classList.toggle("open");
 }
 
-// === HISTORIK (read-only for pending, editable for done) ===
+// === HISTORIK ===
 function renderHistory(){
   var container=$("history-list");
-  var rounds=Object.keys(state.roundLog).filter(function(k){ return k!=="preview"; }).map(Number).sort(function(a,b){ return a-b; });
-  if(!rounds.length){ container.innerHTML='<p style="color:var(--muted)">Ingen afsluttede runder endnu.</p>'; return; }
+  var rounds=Object.keys(state.roundLog).filter(function(k){return k!=="preview";}).map(Number).sort(function(a,b){return a-b;});
+  if(!rounds.length){container.innerHTML='<p style="color:var(--muted)">Ingen afsluttede runder endnu.</p>';return;}
   container.innerHTML=rounds.map(function(rNum){
     var r=state.roundLog[rNum];
     var isPending=!!r.pending;
-    var totalPts=isPending?0:Object.values(r.entries).reduce(function(s,e){ return s+e.points; },0);
+    var totalPts=isPending?0:Object.values(r.entries).reduce(function(s,e){return s+e.points;},0);
     var tl={normal:"",monument:"🏛️",grandtour:"🏔️"}[r.raceType]||"";
-    var statusBadge=isPending?
-      '<span class="status-badge pending">🕐 Afventer</span>':
-      '<span class="status-badge done">✅ Afsluttet</span>';
-
+    var statusBadge=isPending?'<span class="status-badge pending">🕐 Afventer</span>':'<span class="status-badge done">✅ Afsluttet</span>';
     var editPanel=!isPending?
       '<div class="history-edit-panel" id="history-edit-'+rNum+'">'+
         '<h4 style="margin-bottom:12px">✏️ Ret runde '+rNum+'</h4>'+
-        [1,2,3,4,5].map(function(i){
-          return '<div class="result-row"><label>'+["🥇","🥈","🥉","4.","5."][i-1]+' plads</label>'+
-            '<input class="history-top5-input" data-round="'+rNum+'" data-pos="'+(i-1)+'" placeholder="Rytternavn" value="'+(r.top5[i-1]||"")+'" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem"></div>';
+        [0,1,2,3,4].map(function(i){
+          return '<div class="result-row"><label>'+["🥇","🥈","🥉","4.","5."][i]+' plads</label>'+
+            '<input class="history-top5-input" data-round="'+rNum+'" data-pos="'+i+'" placeholder="Rytternavn" value="'+(r.top5[i]||"")+'" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem"></div>';
         }).join("")+
         '<h4 style="margin:12px 0 8px">Stjerner per rytter</h4>'+
         Object.entries(r.entries).map(function(kv){
@@ -1042,8 +1035,7 @@ function renderHistory(){
         }).join("")+
         '<button class="btn warning" style="margin-top:10px" onclick="recalcHistoryRound('+rNum+')">🔄 Genberegn runde '+rNum+'</button>'+
       '</div>'
-      : '<p style="font-size:0.82rem;color:var(--pending);margin-top:10px">Udfyld resultatet fra GM-fanens "Afventende resultater"-sektion.</p>';
-
+      :'<p style="font-size:0.82rem;color:var(--pending);margin-top:10px">Udfyld resultatet fra sektionen Afventende resultater øverst.</p>';
     return '<div class="history-round'+(isPending?" pending-round":"")+'">'+
       '<div class="history-round-header" onclick="toggleHistory('+rNum+')">'+
         '<span><strong>Runde '+rNum+'</strong> – '+r.raceName+' '+tl+' '+statusBadge+'</span>'+
@@ -1060,66 +1052,66 @@ function renderHistory(){
         '</tbody></table>'+
         (!isPending?'<button class="btn warning small" style="margin-top:12px" onclick="openHistoryEdit('+rNum+')">✏️ Ret denne runde</button>':'')+
         editPanel+
-      '</div>'+
-    '</div>';
+      '</div></div>';
   }).join("");
 }
 
-function toggleHistory(rNum){ $("history-body-"+rNum).classList.toggle("open"); }
-function openHistoryEdit(rNum){ $("history-edit-"+rNum).classList.toggle("open"); }
+function toggleHistory(rNum){$("history-body-"+rNum).classList.toggle("open");}
+function openHistoryEdit(rNum){$("history-edit-"+rNum).classList.toggle("open");}
 
 function recalcHistoryRound(rNum){
   var top5inputs=document.querySelectorAll('.history-top5-input[data-round="'+rNum+'"]');
   var starInputs=document.querySelectorAll('.history-star-input[data-round="'+rNum+'"]');
-  var newTop5=Array.from(top5inputs).map(function(i){ return i.value.trim().toLowerCase(); });
+  var newTop5=Array.from(top5inputs).map(function(i){return i.value.trim().toLowerCase();});
   var round=state.roundLog[rNum];
   var baseEntries={};
-  Object.entries(round.entries).forEach(function(kv){ baseEntries[kv[0]]={rider:kv[1].rider,stars:kv[1].stars}; });
+  Object.entries(round.entries).forEach(function(kv){baseEntries[kv[0]]={rider:kv[1].rider,stars:kv[1].stars};});
   starInputs.forEach(function(sel){
     var pName=sel.dataset.player;
-    if(baseEntries[pName]) baseEntries[pName].stars=sel.value===""?null:parseInt(sel.value);
+    if(baseEntries[pName])baseEntries[pName].stars=sel.value===""?null:parseInt(sel.value);
   });
   var recomputed=calcRoundPoints(newTop5,baseEntries,round.raceType);
   state.roundLog[rNum]=Object.assign({},round,{top5:newTop5,entries:recomputed});
-  var roundNums=Object.keys(state.roundLog).filter(function(k){ return k!=="preview"; }).map(Number).sort(function(a,b){ return a-b; });
+  var roundNums=Object.keys(state.roundLog).filter(function(k){return k!=="preview";}).map(Number).sort(function(a,b){return a-b;});
   var rIdx=roundNums.indexOf(rNum);
   state.players.forEach(function(p){
-    if(!state.seasonHistory[p.name]) state.seasonHistory[p.name]=[];
+    if(!state.seasonHistory[p.name])state.seasonHistory[p.name]=[];
     state.seasonHistory[p.name].splice(rIdx,1);
     var ne=recomputed[p.name];
-    if(ne) state.seasonHistory[p.name].splice(rIdx,0,{rider:ne.rider,stars:ne.stars,roundNum:rNum});
+    if(ne)state.seasonHistory[p.name].splice(rIdx,0,{rider:ne.rider,stars:ne.stars,roundNum:rNum});
   });
-  recalcTotalPoints(); state.players.sort(function(a,b){ return b.points-a.points; });
-  saveState(); renderStandings(); renderLimitsTable(); renderLimitsStandings(); renderHistory();
+  recalcTotalPoints();state.players.sort(function(a,b){return b.points-a.points;});
+  saveState();renderStandings();renderLimitsTable();renderLimitsStandings();renderHistory();
   alert("✅ Runde "+rNum+" genberegnet!");
 }
 
 // === RENDER ===
 function renderAll(){
-  updateRaceDisplay(); renderOrder(); renderPickBox(); renderPicksList();
-  renderStandings(); renderMiniStandings(); updateProgressBar(); renderPendingBanner();
-  if($("tab-gm").classList.contains("active")&&isGM){ renderStarTable(); renderLimitsTable(); renderHistory(); renderGmPending(); }
-  if($("tab-standings").classList.contains("active")){ renderLimitsStandings(); }
-  if($("tab-calendar").classList.contains("active")){ renderCalendar(); }
-  if($("tab-stats").classList.contains("active")){ renderStats(); }
+  updateRaceDisplay();renderOrder();renderPickBox();renderPicksList();
+  renderStandings();renderMiniStandings();updateProgressBar();renderPendingBanner();renderFavoritesPlayerBox();
+  if($("tab-gm").classList.contains("active")&&isGM){renderGmTab();}
+  if($("tab-standings").classList.contains("active")){renderLimitsStandings();}
+  if($("tab-calendar").classList.contains("active")){renderCalendar();}
+  if($("tab-stats").classList.contains("active")){renderStats();}
 }
 
 function renderPendingBanner(){
   var pending=pendingRounds();
   var banner=$("pending-banner");
-  if(!pending.length){ banner.style.display="none"; } else {
+  if(!pending.length){banner.style.display="none";}
+  else{
     banner.style.display="flex";
     $("pending-count-badge").textContent=pending.length;
-    $("pending-banner-names").textContent=pending.map(function(rNum){ return state.roundLog[rNum].raceName; }).join(", ");
+    $("pending-banner-names").textContent=pending.map(function(rNum){return state.roundLog[rNum].raceName;}).join(", ");
   }
   var note=$("standings-pending-note");
-  if(note) note.style.display=pending.length?"block":"none";
+  if(note)note.style.display=pending.length?"block":"none";
 }
 
 function renderMiniStandings(){
   var medals=["🥇","🥈","🥉","4","5","6"],rowClass=["gold","silver","bronze","","",""];
   var leader=state.players.length?state.players[0].points:0;
-  var el=$("mini-standings"); if(!el) return;
+  var el=$("mini-standings");if(!el)return;
   el.innerHTML=state.players.map(function(p,i){
     var diff=i===0?"":"−"+(leader-p.points);
     return '<tr class="standings-row '+(rowClass[i]||'')+'"><td>'+medals[i]+'</td><td><strong>'+p.name+'</strong></td>'+
@@ -1130,22 +1122,22 @@ function renderMiniStandings(){
 function updateProgressBar(){
   var pct=Math.round(((state.currentRound-1)/RACES.length)*100);
   var bar=$("prog-bar"),label=$("prog-label");
-  if(bar) bar.style.width=pct+"%";
-  if(label) label.textContent="Løb "+state.currentRound+" af "+RACES.length;
+  if(bar)bar.style.width=pct+"%";
+  if(label)label.textContent="Løb "+state.currentRound+" af "+RACES.length;
 }
 
 function updateRaceDisplay(){
   var r=currentRace(),isDouble=r.type==="monument"||r.type==="grandtour";
-  function set(id,val){ var el=$(id); if(el) el.textContent=val; }
-  set("display-race-name",r.name); set("display-race-type",typeLabel[r.type]);
-  set("display-race-date",r.date); set("display-double",isDouble?"⚡ Dobbeltpoint!":"Normal");
+  function set(id,val){var el=$(id);if(el)el.textContent=val;}
+  set("display-race-name",r.name);set("display-race-type",typeLabel[r.type]);
+  set("display-race-date",r.date);set("display-double",isDouble?"⚡ Dobbeltpoint!":"Normal");
   set("round-badge","Runde "+state.currentRound);
   var gmInfo=$("gm-race-info");
-  if(gmInfo) gmInfo.innerHTML="<strong>Runde "+state.currentRound+" af "+RACES.length+"</strong><br>🏁 <strong>"+r.name+"</strong><br>📅 "+r.date+"<br>🏷️ "+typeLabel[r.type]+(isDouble?" – <strong style='color:var(--danger)'>⚡ Dobbeltpoint</strong>":"");
+  if(gmInfo)gmInfo.innerHTML="<strong>Runde "+state.currentRound+" af "+RACES.length+"</strong><br>🏁 <strong>"+r.name+"</strong><br>📅 "+r.date+"<br>🏷️ "+typeLabel[r.type]+(isDouble?" – <strong style='color:var(--danger)'>⚡ Dobbeltpoint</strong>":"");
 }
 
 function renderCalendar(){
-  var container=$("calendar-list"); if(!container) return;
+  var container=$("calendar-list");if(!container)return;
   var pendingNums=pendingRounds();
   container.innerHTML=RACES.map(function(r,i){
     var rNum=i+1;
@@ -1162,7 +1154,7 @@ function renderCalendar(){
 function renderStandings(){
   var medals=["🥇","🥈","🥉","4","5","6"],rowClass=["gold","silver","bronze","","",""];
   var leader=state.players.length?state.players[0].points:0;
-  var el=$("standings-body-full"); if(!el) return;
+  var el=$("standings-body-full");if(!el)return;
   el.innerHTML=state.players.map(function(p,i){
     var diff=i===0?"":"-"+(leader-p.points)+" pt";
     return '<tr class="standings-row '+(rowClass[i]||'')+'"><td>'+medals[i]+'</td><td><strong>'+p.name+'</strong></td>'+
@@ -1171,7 +1163,7 @@ function renderStandings(){
 }
 
 function limitsHTML(bodyId){
-  var el=$(bodyId); if(!el) return;
+  var el=$(bodyId);if(!el)return;
   el.innerHTML=state.players.map(function(p){
     var t8=top8UsedCount(p.name),fs=fiveStarUsedCount(p.name);
     return "<tr><td><strong>"+p.name+"</strong></td>"+
@@ -1179,68 +1171,69 @@ function limitsHTML(bodyId){
       '<td style="color:'+(fs>=5?"var(--danger)":fs>=4?"#E67E22":"var(--success)")+'">'+fs+"/5 "+(fs>=5?"🚫":fs>=4?"⚠️":"✅")+"</td></tr>";
   }).join("");
 }
-function renderLimitsTable(){ limitsHTML("limits-body"); }
-function renderLimitsStandings(){ limitsHTML("limits-body-standings"); }
+function renderLimitsTable(){limitsHTML("limits-body");}
+function renderLimitsStandings(){limitsHTML("limits-body-standings");}
 
 function renderOrder(){
-  var badge=$("round-badge"); if(badge) badge.textContent="Runde "+state.currentRound;
-  var el=$("order-list"); if(!el) return;
+  var badge=$("round-badge");if(badge)badge.textContent="Runde "+state.currentRound;
+  var el=$("order-list");if(!el)return;
   el.innerHTML=roundOrder.map(function(p,i){
     var cls="player-chip";
-    if(state.picks[p.name]) cls+=" done";
-    else if(i===state.currentPickIndex) cls+=" active";
+    if(state.picks[p.name])cls+=" done";
+    else if(i===state.currentPickIndex)cls+=" active";
     return '<div class="'+cls+'">'+(i+1)+". "+p.name+"</div>";
   }).join("");
 }
 
 function renderPickBox(){
-  var box=$("pick-box"); if(!box) return;
+  var box=$("pick-box");if(!box)return;
   if(state.currentPickIndex>=state.players.length){
-    box.innerHTML='<p style="color:var(--success);font-weight:700;font-size:1rem">✅ Alle har valgt rytter!</p>'; return;
+    box.innerHTML='<p style="color:var(--success);font-weight:700;font-size:1rem">✅ Alle har valgt rytter!</p>';return;
   }
-  if(!roundOrder.length) return;
+  if(!roundOrder.length)return;
   if(!$("active-name")){
     box.innerHTML='<div class="turn-label">Det er <span class="turn-name" id="active-name"></span>\'s tur!</div>'+
       '<div class="ac-wrap"><input type="text" id="search-input" placeholder="Søg efter rytter..." autocomplete="off"><ul class="ac-list" id="suggestions" style="display:none"></ul></div>'+
       '<button class="btn" id="confirm-btn">✅ Bekræft valg</button><p class="error" id="error-msg"></p>';
     playerAC=setupAutocomplete($("search-input"),$("suggestions"),{
-      takenCheck:function(r){ return Object.entries(state.picks).some(function(e){ return e[1]===r&&e[0]!==editingPlayer; }); },
+      takenCheck:function(r){return Object.entries(state.picks).some(function(e){return e[1]===r&&e[0]!==editingPlayer;});},
       blockedCheck:function(r){
-        if(!state.players||!roundOrder.length) return false;
+        if(!state.players||!roundOrder.length)return false;
         var pName=editingPlayer||(state.currentPickIndex<state.players.length?activePlayer().name:null);
-        if(!pName||!isTop8(r)) return false;
-        if(top8UsedCount(pName)>=4) return true;
-        return (state.seasonHistory[pName]||[]).some(function(e){ return e.rider.toLowerCase()===r.toLowerCase(); });
+        if(!pName||!isTop8(r))return false;
+        if(top8UsedCount(pName)>=4)return true;
+        return(state.seasonHistory[pName]||[]).some(function(e){return e.rider.toLowerCase()===r.toLowerCase();});
       },
-      onSelect:function(name){ selectedRider=name; }
+      onSelect:function(name){selectedRider=name;}
     });
-    $("search-input").addEventListener("input",function(){ selectedRider=null; });
-    $("confirm-btn").addEventListener("click", handleConfirm);
+    $("search-input").addEventListener("input",function(){selectedRider=null;});
+    $("confirm-btn").addEventListener("click",handleConfirm);
   }
   $("active-name").textContent=activePlayer().name;
   $("confirm-btn").textContent="✅ Bekræft valg";
-  playerAC.clear(); $("error-msg").textContent="";
-  editingPlayer=null; selectedRider=null;
+  playerAC.clear();$("error-msg").textContent="";
+  editingPlayer=null;selectedRider=null;
 }
 
 function renderPicksList(){
-  var body=$("picks-body"); if(!body) return;
-  var entries=roundOrder.map(function(p){ return [p.name,state.picks[p.name]]; }).filter(function(e){ return e[1]; });
-  if(!entries.length){ body.innerHTML='<tr><td colspan="3" style="color:var(--muted)">Ingen valgt endnu...</td></tr>'; return; }
+  var body=$("picks-body");if(!body)return;
+  var entries=roundOrder.map(function(p){return[p.name,state.picks[p.name]];}).filter(function(e){return e[1];});
+  if(!entries.length){body.innerHTML='<tr><td colspan="3" style="color:var(--muted)">Ingen valgt endnu...</td></tr>';return;}
   body.innerHTML=entries.map(function(e){
     var pName=e[0],rider=e[1];
     var editBtn=isLastPicked(pName)&&!state.picksLocked?'<button class="btn edit small" onclick="startEdit(\''+pName+'\')">✏️</button>':"";
-    return '<tr class="'+(isLastPicked(pName)?"last-pick-row":"")+'"><td><strong>'+pName+'</strong></td><td>🚴 '+rider+(isTop8(rider)?" 🌟":"")+"</td><td>"+editBtn+"</td></tr>";
+    var tag=isTop8(rider)?" 🌟":isFavorite(rider)?" ⭐⭐⭐⭐⭐":"";
+    return '<tr class="'+(isLastPicked(pName)?"last-pick-row":"")+'"><td><strong>'+pName+'</strong></td><td>🚴 '+rider+tag+"</td><td>"+editBtn+"</td></tr>";
   }).join("");
 }
 
 function renderStarTable(){
-  var body=$("star-table-body"); if(!body) return;
+  var body=$("star-table-body");if(!body)return;
   var entries=Object.entries(state.picks);
-  if(!entries.length){ body.innerHTML='<tr><td colspan="4" style="color:var(--muted)">Ingen ryttere valgt endnu</td></tr>'; return; }
+  if(!entries.length){body.innerHTML='<tr><td colspan="4" style="color:var(--muted)">Ingen ryttere valgt endnu</td></tr>';return;}
   body.innerHTML=entries.map(function(kv){
     var player=kv[0],rider=kv[1],fs=fiveStarUsedCount(player);
-    return '<tr id="star-row-'+player+'"><td><strong>'+player+'</strong></td><td>'+rider+(isTop8(rider)?" 🌟":"")+'</td><td>'+
+    return '<tr id="star-row-'+player+'"><td><strong>'+player+'</strong></td><td>'+rider+(isTop8(rider)?" 🌟":isFavorite(rider)?" ⭐⭐⭐⭐⭐":"")+'</td><td>'+
       '<select onchange="setStars(\''+player+'\',this.value)" style="width:100%;padding:6px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem">'+
       '<option value="" '+(state.starRatings[player]==null?"selected":"")+'>– Ikke tildelt –</option>'+
       '<option value="5" '+(state.starRatings[player]===5?"selected":"")+(fs>=5?" disabled":"")+'>⭐⭐⭐⭐⭐ (−1)'+(fs>=5?" 🚫":"")+'</option>'+
@@ -1256,46 +1249,41 @@ function renderStarTable(){
 
 function setStars(playerName,val){
   var stars=val===""?null:parseInt(val);
-  if(stars===5&&fiveStarUsedCount(playerName)>=5){ alert("⛔ "+playerName+" har allerede brugt 5-stjerne 5 gange."); renderStarTable(); return; }
-  state.starRatings[playerName]=stars; saveState(); renderLimitsTable(); renderLimitsStandings();
+  if(stars===5&&fiveStarUsedCount(playerName)>=5){alert("⛔ "+playerName+" har allerede brugt 5-stjerne 5 gange.");renderStarTable();return;}
+  state.starRatings[playerName]=stars;saveState();renderLimitsTable();renderLimitsStandings();
 }
 
 var PLAYER_COLORS={"Emil":"#2D6A4F","Christian":"#52B788","Dennis":"#E8B800","Mathias":"#C0392B","Anders":"#1A6AAD","Tobias":"#8E44AD"};
 var chartInstances={};
-function destroyChart(id){ if(chartInstances[id]){ chartInstances[id].destroy(); delete chartInstances[id]; } }
+function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}}
 
 function renderStats(){
-  // Only use completed (non-pending) rounds for charts
-  var rounds=Object.keys(state.roundLog).filter(function(k){ return k!=="preview"&&!state.roundLog[k].pending; }).map(Number).sort(function(a,b){ return a-b; });
+  var rounds=Object.keys(state.roundLog).filter(function(k){return k!=="preview"&&!state.roundLog[k].pending;}).map(Number).sort(function(a,b){return a-b;});
   if(!rounds.length){
     ["chart-progress","chart-form","chart-hitrate"].forEach(function(id){
-      destroyChart(id);
-      var c=$(id); if(c){ c.getContext("2d").clearRect(0,0,c.width,c.height); }
+      destroyChart(id);var c=$(id);if(c)c.getContext("2d").clearRect(0,0,c.width,c.height);
     });
     $("hitrate-details").innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Ingen data endnu – afslut første runde for at se statistik 🚴</p>';
     return;
   }
   destroyChart("chart-progress");
-  var labels=rounds.map(function(r){ var n=state.roundLog[r].raceName; return n.length>15?n.substring(0,15)+"…":n; });
+  var labels=rounds.map(function(r){var n=state.roundLog[r].raceName;return n.length>15?n.substring(0,15)+"…":n;});
   chartInstances["chart-progress"]=new Chart($("chart-progress"),{type:"line",data:{labels:labels,datasets:PLAYERS_ORDER.map(function(name){
-    var cumul=0,data=rounds.map(function(r){ var e=state.roundLog[r].entries[name]; cumul+=(e?e.points:0); return cumul; });
-    return {label:name,data:data,borderColor:PLAYER_COLORS[name],backgroundColor:PLAYER_COLORS[name]+"22",tension:0.3,fill:false,pointRadius:4,pointHoverRadius:6,borderWidth:2.5};
+    var cumul=0,data=rounds.map(function(r){var e=state.roundLog[r].entries[name];cumul+=(e?e.points:0);return cumul;});
+    return{label:name,data:data,borderColor:PLAYER_COLORS[name],backgroundColor:PLAYER_COLORS[name]+"22",tension:0.3,fill:false,pointRadius:4,pointHoverRadius:6,borderWidth:2.5};
   })},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:"bottom",labels:{boxWidth:12,font:{size:11}}}},scales:{x:{ticks:{font:{size:10},maxRotation:45}},y:{beginAtZero:true,ticks:{font:{size:11}},title:{display:true,text:"Point",font:{size:11}}}}}});
-
   destroyChart("chart-form");
   var last5=rounds.slice(-5);
-  var fLabels=last5.map(function(r){ var n=state.roundLog[r].raceName; return n.length>12?n.substring(0,12)+"…":n; });
+  var fLabels=last5.map(function(r){var n=state.roundLog[r].raceName;return n.length>12?n.substring(0,12)+"…":n;});
   chartInstances["chart-form"]=new Chart($("chart-form"),{type:"bar",data:{labels:fLabels,datasets:PLAYERS_ORDER.map(function(name){
-    return {label:name,data:last5.map(function(r){ var e=state.roundLog[r].entries[name]; return e?e.points:0; }),backgroundColor:PLAYER_COLORS[name]+"cc",borderColor:PLAYER_COLORS[name],borderWidth:1.5,borderRadius:6};
+    return{label:name,data:last5.map(function(r){var e=state.roundLog[r].entries[name];return e?e.points:0;}),backgroundColor:PLAYER_COLORS[name]+"cc",borderColor:PLAYER_COLORS[name],borderWidth:1.5,borderRadius:6};
   })},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:"bottom",labels:{boxWidth:12,font:{size:11}}}},scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{font:{size:11}},title:{display:true,text:"Point",font:{size:11}}}}}});
-
   destroyChart("chart-hitrate");
-  var hrData=PLAYERS_ORDER.map(function(name){ var t=rounds.length,h=rounds.filter(function(r){ var e=state.roundLog[r].entries[name]; return e&&e.points>0; }).length; return t>0?Math.round((h/t)*100):0; });
-  chartInstances["chart-hitrate"]=new Chart($("chart-hitrate"),{type:"bar",data:{labels:PLAYERS_ORDER,datasets:[{label:"Hitrate %",data:hrData,backgroundColor:PLAYERS_ORDER.map(function(n){ return PLAYER_COLORS[n]+"cc"; }),borderColor:PLAYERS_ORDER.map(function(n){ return PLAYER_COLORS[n]; }),borderWidth:1.5,borderRadius:8}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{min:0,max:100,ticks:{callback:function(v){ return v+"%"; },font:{size:11}}},y:{ticks:{font:{size:12,weight:"bold"}}}}}});
-
+  var hrData=PLAYERS_ORDER.map(function(name){var t=rounds.length,h=rounds.filter(function(r){var e=state.roundLog[r].entries[name];return e&&e.points>0;}).length;return t>0?Math.round((h/t)*100):0;});
+  chartInstances["chart-hitrate"]=new Chart($("chart-hitrate"),{type:"bar",data:{labels:PLAYERS_ORDER,datasets:[{label:"Hitrate %",data:hrData,backgroundColor:PLAYERS_ORDER.map(function(n){return PLAYER_COLORS[n]+"cc";}),borderColor:PLAYERS_ORDER.map(function(n){return PLAYER_COLORS[n];}),borderWidth:1.5,borderRadius:8}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{min:0,max:100,ticks:{callback:function(v){return v+"%";},font:{size:11}}},y:{ticks:{font:{size:12,weight:"bold"}}}}}});
   $("hitrate-details").innerHTML=PLAYERS_ORDER.map(function(name){
-    var t=rounds.length,h=rounds.filter(function(r){ var e=state.roundLog[r].entries[name]; return e&&e.points>0; }).length;
-    var tp=rounds.reduce(function(s,r){ var e=state.roundLog[r].entries[name]; return s+(e?e.points:0); },0);
+    var t=rounds.length,h=rounds.filter(function(r){var e=state.roundLog[r].entries[name];return e&&e.points>0;}).length;
+    var tp=rounds.reduce(function(s,r){var e=state.roundLog[r].entries[name];return s+(e?e.points:0);},0);
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;margin-bottom:6px;background:var(--bg);border:1px solid var(--border)">'+
       '<span style="font-weight:700;color:'+PLAYER_COLORS[name]+'">'+name+'</span>'+
       '<span style="font-size:0.85rem;color:var(--muted)">'+h+'/'+t+' løb med point</span>'+
@@ -1305,7 +1293,7 @@ function renderStats(){
 }
 
 setStatus("syncing","Forbinder til Firebase…");
-buildRoundOrder(); renderAll(); subscribeToState();
+buildRoundOrder();renderAll();subscribeToState();
 </script>
 </body>
 </html>
