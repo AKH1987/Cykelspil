@@ -653,6 +653,8 @@ function isDanish(r){var clean=stripTeam(r);return danishRiders.some(function(d)
 function top8UsedCount(n){return(state.seasonHistory[n]||[]).filter(function(e){return isTop8(e.rider);}).length;}
 function fiveStarUsedCount(n){return(state.seasonHistory[n]||[]).filter(function(e){return e.stars===5;}).length;}
 function currentRace(){return RACES[state.currentRound-1]||{name:"–",type:"normal",date:"–"};}
+// Normaliserer en runde, så den ALTID har et gyldigt entries-objekt (beskytter mod defekte/tomme runder)
+function safeRound(r){if(!r||typeof r!=="object")return{raceName:"–",raceType:"normal",top5:[],axelLink:"",entries:{}};if(!r.entries||typeof r.entries!=="object")r.entries={};return r;}
 function getFavorites(){return state.raceFavorites||[];}
 function isFavorite(rider){var clean=stripTeam(rider);return getFavorites().some(function(f){return f.toLowerCase()===clean.toLowerCase();});}
 
@@ -750,6 +752,8 @@ function subscribeToState(){
     state.picksLocked=data.picksLocked||false;
     state.lockTimestamp=data.lockTimestamp||null;
     state.roundLog=data.roundLog||{};
+    // Selvhelende: ryd op i evt. runder der mangler et gyldigt entries-objekt (forhindrer crash)
+    Object.keys(state.roundLog).forEach(function(k){if(k!=="preview")safeRound(state.roundLog[k]);});
     state.seasonHistory=data.seasonHistory||{};
     state.raceFavorites=data.raceFavorites||[];
     state.players=data.players||PLAYERS_DEFAULT.map(function(n){return{name:n,points:0};});
@@ -1208,7 +1212,7 @@ function finalizeRound(rNum,isPending){
     });
   } else {
     if(preview){state.roundLog[rNum]=preview;delete state.roundLog["preview"];}
-    else{state.roundLog[rNum]={raceName:r.name,raceType:r.type,top5:[],axelLink:"",entries:{}};}
+    else{alert("⛔ Du har ikke beregnet point for denne runde endnu.\n\nBrug \"🏁 Beregn point\" først – eller brug \"🕐 Afventer resultat\", hvis løbet ikke er kørt endnu.");return;}
     state.players.forEach(function(p){
       var e=state.roundLog[rNum].entries[p.name];
       if(e){if(!state.seasonHistory[p.name])state.seasonHistory[p.name]=[];state.seasonHistory[p.name].push({rider:e.rider,stars:e.stars,roundNum:rNum});}
@@ -1241,7 +1245,7 @@ function resolvePendingRound(rNum){
   var starInputs=document.querySelectorAll('.pending-star-input[data-round="'+rNum+'"]');
   var round=state.roundLog[rNum];
   var baseEntries={};
-  Object.entries(round.entries).forEach(function(kv){baseEntries[kv[0]]={rider:kv[1].rider,stars:kv[1].stars};});
+  Object.entries(safeRound(round).entries).forEach(function(kv){baseEntries[kv[0]]={rider:kv[1].rider,stars:kv[1].stars};});
   starInputs.forEach(function(sel){
     var pName=sel.dataset.player;
     if(baseEntries[pName])baseEntries[pName].stars=sel.value===""?null:parseInt(sel.value);
@@ -1276,7 +1280,7 @@ function renderGmPending(){
     return '<div class="pending-result-item">'+
       '<h4>'+tl+r.raceName+' <span style="font-size:0.8rem;color:var(--muted)">(Runde '+rNum+')</span></h4>'+
       '<p style="font-size:0.84rem;color:var(--muted);margin-bottom:10px">'+
-        Object.entries(r.entries).map(function(kv){return'<strong>'+kv[0]+'</strong>: '+kv[1].rider;}).join(' · ')+
+        Object.entries(safeRound(r).entries).map(function(kv){return'<strong>'+kv[0]+'</strong>: '+kv[1].rider;}).join(' · ')+
       '</p>'+
       '<button class="btn pending small" onclick="togglePendingResolve('+rNum+')">🕐 Udfyld resultat</button>'+
       '<div class="pending-resolve-panel" id="pending-panel-'+rNum+'">'+
@@ -1289,7 +1293,7 @@ function renderGmPending(){
             '</div></div>';
         }).join("")+
         '<p style="font-size:0.84rem;font-weight:600;color:var(--pending);margin:12px 0 8px">Stjerner per spiller</p>'+
-        Object.entries(r.entries).map(function(kv){
+        Object.entries(safeRound(r).entries).map(function(kv){
           var pName=kv[0],e=kv[1];
           return '<div class="result-row" style="margin-bottom:6px"><label style="padding-top:6px">'+pName+'</label>'+
             '<select class="pending-star-input" data-round="'+rNum+'" data-player="'+pName+'" style="flex:1;padding:7px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem">'+
@@ -1328,7 +1332,7 @@ function renderHistory(){
   container.innerHTML=rounds.map(function(rNum){
     var r=state.roundLog[rNum];
     var isPending=!!r.pending;
-    var totalPts=isPending?0:Object.values(r.entries).reduce(function(s,e){return s+e.points;},0);
+    var totalPts=isPending?0:Object.values(safeRound(r).entries).reduce(function(s,e){return s+e.points;},0);
     var tl={normal:"",monument:"🏛️",grandtour:"🏔️"}[r.raceType]||"";
     var statusBadge=isPending?'<span class="status-badge pending">🕐 Afventer</span>':'<span class="status-badge done">✅ Afsluttet</span>';
     var editPanel=!isPending?
@@ -1339,7 +1343,7 @@ function renderHistory(){
             '<input class="history-top5-input" data-round="'+rNum+'" data-pos="'+i+'" placeholder="Rytternavn" value="'+(r.top5[i]||"")+'" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem"></div>';
         }).join("")+
         '<h4 style="margin:12px 0 8px">Ryttervalg og stjerner</h4>'+
-        Object.entries(r.entries).map(function(kv){
+        Object.entries(safeRound(r).entries).map(function(kv){
           var pName=kv[0],e=kv[1];
           return '<div style="margin-bottom:10px;padding:8px;background:var(--bg);border-radius:8px">'+
             '<div style="font-weight:700;font-size:0.85rem;margin-bottom:6px">'+pName+'</div>'+
@@ -1372,7 +1376,7 @@ function renderHistory(){
       '<div class="history-round-body" id="history-body-'+rNum+'">'+
         (r.axelLink?'<p style="margin-bottom:10px;font-size:0.88rem">📎 <a href="'+r.axelLink+'" target="_blank" style="color:var(--primary);word-break:break-all">'+r.axelLink+'</a></p>':'')+
         '<table><thead><tr><th style="width:22%">Spiller</th><th style="width:22%">Rytter</th><th style="width:10%">Pt</th><th>Detaljer</th></tr></thead><tbody>'+
-        Object.entries(r.entries).map(function(kv){
+        Object.entries(safeRound(r).entries).map(function(kv){
           return '<tr><td><strong>'+kv[0]+'</strong></td><td>'+kv[1].rider+'</td>'+
             '<td>'+(isPending?'<span style="color:var(--pending)">?</span>':kv[1].points)+'</td>'+
             '<td style="font-size:0.78rem;color:var(--muted)">'+kv[1].log.replace(/<strong>|<\/strong>/g,"")+'</td></tr>';
@@ -1394,7 +1398,7 @@ function recalcHistoryRound(rNum){
   var newTop5=Array.from(top5inputs).map(function(i){return stripTeam(i.value.trim()).toLowerCase();});
   var round=state.roundLog[rNum];
   var baseEntries={};
-  Object.entries(round.entries).forEach(function(kv){baseEntries[kv[0]]={rider:kv[1].rider,stars:kv[1].stars};});
+  Object.entries(safeRound(round).entries).forEach(function(kv){baseEntries[kv[0]]={rider:kv[1].rider,stars:kv[1].stars};});
   riderInputs.forEach(function(inp){
     var pName=inp.dataset.player;
     if(baseEntries[pName]&&inp.value.trim())baseEntries[pName].rider=inp.value.trim();
@@ -1676,21 +1680,21 @@ function renderStats(){
   destroyChart("chart-progress");
   var labels=rounds.map(function(r){var n=state.roundLog[r].raceName;return n.length>15?n.substring(0,15)+"…":n;});
   chartInstances["chart-progress"]=new Chart($("chart-progress"),{type:"line",data:{labels:labels,datasets:PLAYERS_ORDER.map(function(name){
-    var cumul=0,data=rounds.map(function(r){var e=state.roundLog[r].entries[name];cumul+=(e?e.points:0);return cumul;});
+    var cumul=0,data=rounds.map(function(r){var e=safeRound(state.roundLog[r]).entries[name];cumul+=(e?e.points:0);return cumul;});
     return{label:name,data:data,borderColor:PLAYER_COLORS[name],backgroundColor:PLAYER_COLORS[name]+"22",tension:0.3,fill:false,pointRadius:4,pointHoverRadius:6,borderWidth:2.5};
   })},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:"bottom",labels:{boxWidth:12,font:{size:11}}}},scales:{x:{ticks:{font:{size:10},maxRotation:45}},y:{beginAtZero:true,ticks:{font:{size:11}},title:{display:true,text:"Point",font:{size:11}}}}}});
   destroyChart("chart-form");
   var last5=rounds.slice(-5);
   var fLabels=last5.map(function(r){var n=state.roundLog[r].raceName;return n.length>12?n.substring(0,12)+"…":n;});
   chartInstances["chart-form"]=new Chart($("chart-form"),{type:"bar",data:{labels:fLabels,datasets:PLAYERS_ORDER.map(function(name){
-    return{label:name,data:last5.map(function(r){var e=state.roundLog[r].entries[name];return e?e.points:0;}),backgroundColor:PLAYER_COLORS[name]+"cc",borderColor:PLAYER_COLORS[name],borderWidth:1.5,borderRadius:6};
+    return{label:name,data:last5.map(function(r){var e=safeRound(state.roundLog[r]).entries[name];return e?e.points:0;}),backgroundColor:PLAYER_COLORS[name]+"cc",borderColor:PLAYER_COLORS[name],borderWidth:1.5,borderRadius:6};
   })},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:"bottom",labels:{boxWidth:12,font:{size:11}}}},scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{font:{size:11}},title:{display:true,text:"Point",font:{size:11}}}}}});
   destroyChart("chart-hitrate");
-  var hrData=PLAYERS_ORDER.map(function(name){var t=rounds.length,h=rounds.filter(function(r){var e=state.roundLog[r].entries[name];return e&&e.points>0;}).length;return t>0?Math.round((h/t)*100):0;});
+  var hrData=PLAYERS_ORDER.map(function(name){var t=rounds.length,h=rounds.filter(function(r){var e=safeRound(state.roundLog[r]).entries[name];return e&&e.points>0;}).length;return t>0?Math.round((h/t)*100):0;});
   chartInstances["chart-hitrate"]=new Chart($("chart-hitrate"),{type:"bar",data:{labels:PLAYERS_ORDER,datasets:[{label:"Hitrate %",data:hrData,backgroundColor:PLAYERS_ORDER.map(function(n){return PLAYER_COLORS[n]+"cc";}),borderColor:PLAYERS_ORDER.map(function(n){return PLAYER_COLORS[n];}),borderWidth:1.5,borderRadius:8}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{min:0,max:100,ticks:{callback:function(v){return v+"%";},font:{size:11}}},y:{ticks:{font:{size:12,weight:"bold"}}}}}});
   $("hitrate-details").innerHTML=PLAYERS_ORDER.map(function(name){
-    var t=rounds.length,h=rounds.filter(function(r){var e=state.roundLog[r].entries[name];return e&&e.points>0;}).length;
-    var tp=rounds.reduce(function(s,r){var e=state.roundLog[r].entries[name];return s+(e?e.points:0);},0);
+    var t=rounds.length,h=rounds.filter(function(r){var e=safeRound(state.roundLog[r]).entries[name];return e&&e.points>0;}).length;
+    var tp=rounds.reduce(function(s,r){var e=safeRound(state.roundLog[r]).entries[name];return s+(e?e.points:0);},0);
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;margin-bottom:6px;background:var(--bg);border:1px solid var(--border)">'+
       '<span style="font-weight:700;color:'+PLAYER_COLORS[name]+'">'+name+'</span>'+
       '<span style="font-size:0.85rem;color:var(--muted)">'+h+'/'+t+' løb med point</span>'+
