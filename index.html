@@ -159,13 +159,6 @@
     .pending-resolve-panel{display:none;margin-top:12px;padding-top:12px;border-top:1px solid #d4b0f0}
     .pending-resolve-panel.open{display:block}
     .fav-box{background:var(--pending-bg);border:2px solid var(--pending);border-radius:12px;padding:14px;margin-bottom:12px}
-    .completed-races-dropdown{margin-top:10px;border:1.5px solid var(--border);border-radius:14px;padding:2px 14px;background:var(--bg)}
-    .completed-races-dropdown summary{cursor:pointer;padding:12px 0;font-weight:600;color:var(--muted);font-size:0.85rem;list-style:none;display:flex;align-items:center;gap:6px}
-    .completed-races-dropdown summary::-webkit-details-marker{display:none}
-    .completed-races-dropdown summary::before{content:"▶";font-size:0.7rem;transition:transform 0.2s;color:var(--muted)}
-    .completed-races-dropdown[open] summary::before{transform:rotate(90deg)}
-    .completed-races-dropdown[open] summary{color:var(--primary-dark)}
-    .completed-races-dropdown .race-item.completed{opacity:0.6}
     @media(max-width:480px){body{padding:8px}.app-header h1{font-size:1.1rem}th,td{padding:7px 8px;font-size:0.82rem}.tab{font-size:0.7rem;padding:8px 3px}.prog-bar-wrap{width:80px}}
   </style>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -652,6 +645,7 @@ var roundOrder=[],editingPlayer=null,selectedRider=null;
 var countdownInterval=null,isGM=false;
 var gmFavAcInstances=[],playerFavAcInstances=[];
 var pendingAcFields={};
+var pendingRiderAcFields={};
 
 function $(id){return document.getElementById(id);}
 function stripTeam(r){return r?r.replace(/\s*\([^)]+\)$/, '').trim():r;}
@@ -1253,6 +1247,13 @@ function resolvePendingRound(rNum){
   var round=state.roundLog[rNum];
   var baseEntries={};
   Object.entries(safeRound(round).entries).forEach(function(kv){baseEntries[kv[0]]={rider:kv[1].rider,stars:kv[1].stars};});
+  var riderAcs=pendingRiderAcFields[rNum]||{};
+  Object.keys(baseEntries).forEach(function(pName){
+    var ac=riderAcs[pName];
+    if(!ac)return;
+    var v=ac.getValue();
+    if(v)baseEntries[pName].rider=v;
+  });
   starInputs.forEach(function(sel){
     var pName=sel.dataset.player;
     if(baseEntries[pName])baseEntries[pName].stars=sel.value===""?null:parseInt(sel.value);
@@ -1299,6 +1300,15 @@ function renderGmPending(){
               '<ul class="ac-list" id="pending-ac-list-'+rNum+'-'+i+'" style="display:none"></ul>'+
             '</div></div>';
         }).join("")+
+        '<p style="font-size:0.84rem;font-weight:600;color:var(--pending);margin:12px 0 8px">Ryttervalg (kan rettes)</p>'+
+        Object.entries(safeRound(r).entries).map(function(kv){
+          var pName=kv[0],e=kv[1];
+          return '<div class="result-row" style="margin-bottom:6px"><label style="padding-top:11px">'+pName+'</label>'+
+            '<div class="ac-wrap" id="pending-rider-ac-wrap-'+rNum+'-'+pName+'" style="flex:1;margin-bottom:0">'+
+              '<input id="pending-rider-ac-input-'+rNum+'-'+pName+'" placeholder="Søg rytter..." autocomplete="off" value="'+e.rider+'" class="selected">'+
+              '<ul class="ac-list" id="pending-rider-ac-list-'+rNum+'-'+pName+'" style="display:none"></ul>'+
+            '</div></div>';
+        }).join("")+
         '<p style="font-size:0.84rem;font-weight:600;color:var(--pending);margin:12px 0 8px">Stjerner per spiller</p>'+
         Object.entries(safeRound(r).entries).map(function(kv){
           var pName=kv[0],e=kv[1];
@@ -1322,6 +1332,18 @@ function renderGmPending(){
       var inp=$("pending-ac-input-"+rNum+"-"+i);
       var ul=$("pending-ac-list-"+rNum+"-"+i);
       return setupAutocomplete(inp,ul,{});
+    });
+    var r=state.roundLog[rNum];
+    pendingRiderAcFields[rNum]={};
+    Object.keys(safeRound(r).entries).forEach(function(pName){
+      var inp=$("pending-rider-ac-input-"+rNum+"-"+pName);
+      var ul=$("pending-rider-ac-list-"+rNum+"-"+pName);
+      if(!inp||!ul)return;
+      pendingRiderAcFields[rNum][pName]=setupAutocomplete(inp,ul,{
+        takenCheck:function(rider){
+          return Object.entries(safeRound(state.roundLog[rNum]).entries).some(function(kv){return kv[0]!==pName&&kv[1].rider===rider;});
+        }
+      });
     });
   });
 }
@@ -1521,8 +1543,7 @@ function updateRaceDisplay(){
 function renderCalendar(){
   var container=$("calendar-list");if(!container)return;
   var pendingNums=pendingRounds();
-  var upcomingHTML="",completedHTML="",completedCount=0;
-  RACES.forEach(function(r,i){
+  container.innerHTML=RACES.map(function(r,i){
     var rNum=i+1;
     var isPending=pendingNums.indexOf(rNum)>=0;
     var done=rNum<state.currentRound&&!isPending;
@@ -1531,14 +1552,8 @@ function renderCalendar(){
     var badge=done?"badge-done":isPending?"badge-pending":typeBadge[r.type];
     var badgeLabel=done?"✅":isPending?"🕐 Afventer":typeBadgeLabel[r.type];
     var firstPicker=(RACE_ORDERS[rNum-1]||PLAYERS_ORDER)[0];
-    var html='<div class="'+cls+'"><span class="race-num">'+rNum+'</span><span class="race-date">'+r.date+'</span><span class="race-name">'+r.name+'</span><span style="font-size:0.72rem;color:var(--muted);flex-shrink:0">1. '+firstPicker+'</span><span class="race-badge '+badge+'">'+badgeLabel+'</span></div>';
-    if(done){completedHTML+=html;completedCount++;}
-    else{upcomingHTML+=html;}
-  });
-  var completedBlock=completedCount?
-    '<details class="completed-races-dropdown"><summary>Afviklede løb ('+completedCount+')</summary><div style="margin-top:4px">'+completedHTML+'</div></details>'
-    :'';
-  container.innerHTML=(upcomingHTML||'<p style="color:var(--muted)">Ingen kommende løb.</p>')+completedBlock;
+    return '<div class="'+cls+'"><span class="race-num">'+rNum+'</span><span class="race-date">'+r.date+'</span><span class="race-name">'+r.name+'</span><span style="font-size:0.72rem;color:var(--muted);flex-shrink:0">1. '+firstPicker+'</span><span class="race-badge '+badge+'">'+badgeLabel+'</span></div>';
+  }).join("");
 }
 
 function renderStandings(){
