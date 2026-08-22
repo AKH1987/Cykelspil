@@ -1239,6 +1239,49 @@ function recalcTotalPoints(){
   });
 }
 
+// === GEM RYTTERVALG UDEN AT BEKRÆFTE RESULTAT (løbet ikke kørt endnu) ===
+function savePendingRiderEdits(rNum){
+  var round=state.roundLog[rNum];
+  var entries=safeRound(round).entries;
+  var riderAcs=pendingRiderAcFields[rNum]||{};
+  var starInputs=document.querySelectorAll('.pending-star-input[data-round="'+rNum+'"]');
+  var newRiders={};
+  var conflict=null;
+  Object.keys(entries).forEach(function(pName){
+    var ac=riderAcs[pName];
+    var v=ac?ac.getValue():null;
+    newRiders[pName]=v||entries[pName].rider;
+  });
+  Object.keys(newRiders).forEach(function(pName){
+    Object.keys(newRiders).forEach(function(other){
+      if(other!==pName&&newRiders[other]===newRiders[pName])conflict=newRiders[pName];
+    });
+  });
+  if(conflict){alert("⚠️ "+conflict+" er valgt af flere spillere. Ret det før du gemmer.");return;}
+  Object.keys(entries).forEach(function(pName){
+    entries[pName].rider=newRiders[pName];
+    entries[pName].log="Afventer resultat";
+  });
+  starInputs.forEach(function(sel){
+    var pName=sel.dataset.player;
+    if(entries[pName])entries[pName].stars=sel.value===""?null:parseInt(sel.value);
+  });
+  state.roundLog[rNum]=Object.assign({},round,{entries:entries});
+  // Hold sæsonhistorikken i sync, så Top-8/5-stjerne-tælleren er korrekt
+  state.players.forEach(function(p){
+    var hist=state.seasonHistory[p.name]||[];
+    var idx=-1;
+    for(var i=0;i<hist.length;i++){if(hist[i].roundNum===rNum){idx=i;break;}}
+    var e=entries[p.name];
+    if(idx>=0&&e){hist[idx]={rider:e.rider,stars:e.stars,roundNum:rNum};}
+    else if(idx<0&&e){hist.push({rider:e.rider,stars:e.stars,roundNum:rNum});}
+    state.seasonHistory[p.name]=hist;
+  });
+  saveState();renderAll();if(isGM)renderGmTab();
+  var panel=$("pending-panel-"+rNum);if(panel)panel.classList.add("open");
+  alert("✅ Ryttervalg for runde "+rNum+" er gemt. Runden afventer stadig løbsresultatet.");
+}
+
 // === RESOLVE PENDING ===
 function resolvePendingRound(rNum){
   var acs=pendingAcFields[rNum];
@@ -1323,7 +1366,8 @@ function renderGmPending(){
             '<option value="0" '+(e.stars===0?"selected":"")+'>Ikke nævnt (+3)</option>'+
             '</select></div>';
         }).join("")+
-        '<button class="btn pending" style="margin-top:10px" onclick="resolvePendingRound('+rNum+')">✅ Bekræft resultat og beregn point</button>'+
+        '<button class="btn edit small" style="margin-top:10px" onclick="savePendingRiderEdits('+rNum+')">💾 Gem ryttervalg (løbet ikke kørt endnu)</button>'+
+        '<button class="btn pending" style="margin-top:10px;margin-left:6px" onclick="resolvePendingRound('+rNum+')">✅ Bekræft resultat og beregn point</button>'+
       '</div></div>';
   }).join("");
   // Bind autocomplete after HTML is in DOM
