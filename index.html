@@ -610,11 +610,11 @@ var RACES=[
   {date:"4/8/2026",name:"Vuelta a Burgos",type:"normal"},
   {date:"19/8/2026",name:"Renewi Tour",type:"normal"},
   {date:"22/8/2026",name:"La Vuelta – Vinder",type:"grandtour"},
-  {date:"25/8/2026",name:"La Vuelta – 4. Etape",type:"grandtour"},
   {date:"30/8/2026",name:"Bretagne Classic",type:"normal"},
   {date:"5/9/2026",name:"La Vuelta – 14. Etape",type:"grandtour"},
   {date:"11/9/2026",name:"GP Cycliste de Québec",type:"normal"},
   {date:"12/9/2026",name:"La Vuelta – 20. Etape",type:"grandtour"},
+  {date:"13/9/2026",name:"La Vuelta – 21. Etape",type:"grandtour"},
   {date:"13/9/2026",name:"GP Cycliste de Montréal",type:"normal"},
   {date:"20/9/2026",name:"VM Enkeltstart",type:"normal"},
   {date:"27/9/2026",name:"VM Linjeløb",type:"normal"},
@@ -645,7 +645,6 @@ var roundOrder=[],editingPlayer=null,selectedRider=null;
 var countdownInterval=null,isGM=false;
 var gmFavAcInstances=[],playerFavAcInstances=[];
 var pendingAcFields={};
-var pendingRiderAcFields={};
 
 function $(id){return document.getElementById(id);}
 function stripTeam(r){return r?r.replace(/\s*\([^)]+\)$/, '').trim():r;}
@@ -706,11 +705,11 @@ var RACE_ORDERS=[
   ["Dennis","Mathias","Anders","Tobias","Emil","Christian"],
   ["Mathias","Anders","Tobias","Emil","Christian","Dennis"],
   ["Christian","Anders","Tobias","Emil","Dennis","Mathias"],
-  ["Anders","Mathias","Tobias","Emil","Christian","Dennis"],
   ["Anders","Tobias","Emil","Christian","Dennis","Mathias"],
   ["Christian","Tobias","Emil","Dennis","Mathias","Anders"],
   ["Tobias","Emil","Christian","Dennis","Mathias","Anders"],
   ["Emil","Christian","Dennis","Mathias","Anders","Tobias"],
+  ["Anders","Mathias","Tobias","Emil","Christian","Dennis"],
   ["Emil","Christian","Dennis","Mathias","Anders","Tobias"],
   ["Christian","Dennis","Mathias","Anders","Tobias","Emil"],
   ["Dennis","Mathias","Anders","Tobias","Emil","Christian"],
@@ -1239,49 +1238,6 @@ function recalcTotalPoints(){
   });
 }
 
-// === GEM RYTTERVALG UDEN AT BEKRÆFTE RESULTAT (løbet ikke kørt endnu) ===
-function savePendingRiderEdits(rNum){
-  var round=state.roundLog[rNum];
-  var entries=safeRound(round).entries;
-  var riderAcs=pendingRiderAcFields[rNum]||{};
-  var starInputs=document.querySelectorAll('.pending-star-input[data-round="'+rNum+'"]');
-  var newRiders={};
-  var conflict=null;
-  Object.keys(entries).forEach(function(pName){
-    var ac=riderAcs[pName];
-    var v=ac?ac.getValue():null;
-    newRiders[pName]=v||entries[pName].rider;
-  });
-  Object.keys(newRiders).forEach(function(pName){
-    Object.keys(newRiders).forEach(function(other){
-      if(other!==pName&&newRiders[other]===newRiders[pName])conflict=newRiders[pName];
-    });
-  });
-  if(conflict){alert("⚠️ "+conflict+" er valgt af flere spillere. Ret det før du gemmer.");return;}
-  Object.keys(entries).forEach(function(pName){
-    entries[pName].rider=newRiders[pName];
-    entries[pName].log="Afventer resultat";
-  });
-  starInputs.forEach(function(sel){
-    var pName=sel.dataset.player;
-    if(entries[pName])entries[pName].stars=sel.value===""?null:parseInt(sel.value);
-  });
-  state.roundLog[rNum]=Object.assign({},round,{entries:entries});
-  // Hold sæsonhistorikken i sync, så Top-8/5-stjerne-tælleren er korrekt
-  state.players.forEach(function(p){
-    var hist=state.seasonHistory[p.name]||[];
-    var idx=-1;
-    for(var i=0;i<hist.length;i++){if(hist[i].roundNum===rNum){idx=i;break;}}
-    var e=entries[p.name];
-    if(idx>=0&&e){hist[idx]={rider:e.rider,stars:e.stars,roundNum:rNum};}
-    else if(idx<0&&e){hist.push({rider:e.rider,stars:e.stars,roundNum:rNum});}
-    state.seasonHistory[p.name]=hist;
-  });
-  saveState();renderAll();if(isGM)renderGmTab();
-  var panel=$("pending-panel-"+rNum);if(panel)panel.classList.add("open");
-  alert("✅ Ryttervalg for runde "+rNum+" er gemt. Runden afventer stadig løbsresultatet.");
-}
-
 // === RESOLVE PENDING ===
 function resolvePendingRound(rNum){
   var acs=pendingAcFields[rNum];
@@ -1290,13 +1246,6 @@ function resolvePendingRound(rNum){
   var round=state.roundLog[rNum];
   var baseEntries={};
   Object.entries(safeRound(round).entries).forEach(function(kv){baseEntries[kv[0]]={rider:kv[1].rider,stars:kv[1].stars};});
-  var riderAcs=pendingRiderAcFields[rNum]||{};
-  Object.keys(baseEntries).forEach(function(pName){
-    var ac=riderAcs[pName];
-    if(!ac)return;
-    var v=ac.getValue();
-    if(v)baseEntries[pName].rider=v;
-  });
   starInputs.forEach(function(sel){
     var pName=sel.dataset.player;
     if(baseEntries[pName])baseEntries[pName].stars=sel.value===""?null:parseInt(sel.value);
@@ -1343,15 +1292,6 @@ function renderGmPending(){
               '<ul class="ac-list" id="pending-ac-list-'+rNum+'-'+i+'" style="display:none"></ul>'+
             '</div></div>';
         }).join("")+
-        '<p style="font-size:0.84rem;font-weight:600;color:var(--pending);margin:12px 0 8px">Ryttervalg (kan rettes)</p>'+
-        Object.entries(safeRound(r).entries).map(function(kv){
-          var pName=kv[0],e=kv[1];
-          return '<div class="result-row" style="margin-bottom:6px"><label style="padding-top:11px">'+pName+'</label>'+
-            '<div class="ac-wrap" id="pending-rider-ac-wrap-'+rNum+'-'+pName+'" style="flex:1;margin-bottom:0">'+
-              '<input id="pending-rider-ac-input-'+rNum+'-'+pName+'" placeholder="Søg rytter..." autocomplete="off" value="'+e.rider+'" class="selected">'+
-              '<ul class="ac-list" id="pending-rider-ac-list-'+rNum+'-'+pName+'" style="display:none"></ul>'+
-            '</div></div>';
-        }).join("")+
         '<p style="font-size:0.84rem;font-weight:600;color:var(--pending);margin:12px 0 8px">Stjerner per spiller</p>'+
         Object.entries(safeRound(r).entries).map(function(kv){
           var pName=kv[0],e=kv[1];
@@ -1366,8 +1306,7 @@ function renderGmPending(){
             '<option value="0" '+(e.stars===0?"selected":"")+'>Ikke nævnt (+3)</option>'+
             '</select></div>';
         }).join("")+
-        '<button class="btn edit small" style="margin-top:10px" onclick="savePendingRiderEdits('+rNum+')">💾 Gem ryttervalg (løbet ikke kørt endnu)</button>'+
-        '<button class="btn pending" style="margin-top:10px;margin-left:6px" onclick="resolvePendingRound('+rNum+')">✅ Bekræft resultat og beregn point</button>'+
+        '<button class="btn pending" style="margin-top:10px" onclick="resolvePendingRound('+rNum+')">✅ Bekræft resultat og beregn point</button>'+
       '</div></div>';
   }).join("");
   // Bind autocomplete after HTML is in DOM
@@ -1376,18 +1315,6 @@ function renderGmPending(){
       var inp=$("pending-ac-input-"+rNum+"-"+i);
       var ul=$("pending-ac-list-"+rNum+"-"+i);
       return setupAutocomplete(inp,ul,{});
-    });
-    var r=state.roundLog[rNum];
-    pendingRiderAcFields[rNum]={};
-    Object.keys(safeRound(r).entries).forEach(function(pName){
-      var inp=$("pending-rider-ac-input-"+rNum+"-"+pName);
-      var ul=$("pending-rider-ac-list-"+rNum+"-"+pName);
-      if(!inp||!ul)return;
-      pendingRiderAcFields[rNum][pName]=setupAutocomplete(inp,ul,{
-        takenCheck:function(rider){
-          return Object.entries(safeRound(state.roundLog[rNum]).entries).some(function(kv){return kv[0]!==pName&&kv[1].rider===rider;});
-        }
-      });
     });
   });
 }
